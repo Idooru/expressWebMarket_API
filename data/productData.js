@@ -30,7 +30,7 @@ async function FindAll() {
         throw err;
     }
 
-    if (products === null) throw new Error("no Product");
+    if (products.length === 0) throw new Error("no Product");
 
     return products;
 }
@@ -69,12 +69,12 @@ async function getAfter(id) {
 }
 
 async function Create(package) {
-    const { id, name, price, origin, type } = package;
+    const { name, price, origin, type } = package;
     let createdProduct;
 
     try {
         createdProduct = await Product.create({
-            id,
+            id: Date.now().toString(),
             name,
             price,
             origin,
@@ -84,14 +84,14 @@ async function Create(package) {
         if (err.message === "Validation error") {
             throw new Error("same Product");
         } else if (
-            err.message ||
+            err.message ===
             ("notNull Violation: Product.id cannot be null" &&
                 "notNull Violation: Product.name cannot be null" &&
                 "notNull Violation: Product.price cannot be null" &&
                 "notNull Violation: Product.origin cannot be null" &&
                 "notNull Violation: Product.type cannot be null")
         ) {
-            throw new Error("Form Null");
+            throw new Error("form Null");
         } else throw err;
     }
 
@@ -100,10 +100,9 @@ async function Create(package) {
 
 async function Update(package, paramsId) {
     try {
-        const { id, name, price, origin, type } = package;
+        const { name, price, origin, type } = package;
         await Product.update(
             {
-                id,
                 name,
                 price,
                 origin,
@@ -117,7 +116,7 @@ async function Update(package, paramsId) {
         if (err.message === "Validation error") {
             throw new Error("same Product");
         } else if (
-            err.message ||
+            err.message ===
             ("notNull Violation: Product.id cannot be null" &&
                 "notNull Violation: Product.name cannot be null" &&
                 "notNull Violation: Product.price cannot be null" &&

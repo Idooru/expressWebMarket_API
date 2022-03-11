@@ -1,5 +1,13 @@
 const dataWorker = require("../data/productData");
 
+async function productQuarter(req, res, next) {
+    if (req.query.name) {
+        getProductDetailByName(req, res, next);
+    } else {
+        getProductMain(req, res, next);
+    }
+}
+
 async function getProductDetailById(req, res, next) {
     const paramsId = req.params.id;
     const check = new Object();
@@ -9,15 +17,25 @@ async function getProductDetailById(req, res, next) {
     try {
         product = await dataWorker.FindOne(check);
     } catch (err) {
+        if (err.message === "no Product") {
+            return res.status(401).json({
+                code: 401,
+                message: "Failed to get product's info by id",
+            });
+        }
         return next(err);
     }
 
-    res.locals.id = paramsId;
-    res.locals.productName = product.name;
-    res.locals.productPrice = product.price;
-    res.locals.productOrigin = product.origin;
-    res.locals.productType = product.type;
-    res.render("productInfo");
+    id = paramsId;
+    productName = product.name;
+    productPrice = product.price;
+    productOrigin = product.origin;
+    productType = product.type;
+    return res.json({
+        code: 200,
+        message: "Sucess to get product's info by id",
+        result: { id, productName, productPrice, productOrigin, productType },
+    });
 }
 
 async function getProductDetailByName(req, res, next) {
@@ -29,15 +47,25 @@ async function getProductDetailByName(req, res, next) {
     try {
         product = await dataWorker.FindOne(check);
     } catch (err) {
+        if (err.message === "no Product") {
+            return res.status(401).json({
+                code: 401,
+                message: "Failed to get product's info by name",
+            });
+        }
         return next(err);
     }
 
-    res.locals.id = product.id;
-    res.locals.productName = product.name;
-    res.locals.productPrice = product.price;
-    res.locals.productOrigin = product.origin;
-    res.locals.productType = product.type;
-    res.render("productInfo");
+    id = product.id;
+    productName = product.name;
+    productPrice = product.price;
+    productOrigin = product.origin;
+    productType = product.type;
+    return res.json({
+        code: 200,
+        message: "Sucess to get product's info by name",
+        result: { id, productName, productPrice, productOrigin, productType },
+    });
 }
 
 async function getProductMain(req, res, next) {
@@ -46,6 +74,12 @@ async function getProductMain(req, res, next) {
     try {
         products = await dataWorker.FindAll();
     } catch (err) {
+        if (err.message === "no Product") {
+            return res.status(500).json({
+                code: 500,
+                message: "There is no product, Add product more!",
+            });
+        }
         return next(err);
     }
 
@@ -66,9 +100,11 @@ async function getProductMain(req, res, next) {
     productNames.shift();
     productIds.shift();
 
-    res.locals.productNames = productNames;
-    res.locals.productIds = productIds;
-    res.render("productMain");
+    res.json({
+        code: 200,
+        message: "Sucess to get all product's name",
+        result: { productNames },
+    });
 }
 
 async function createProduct(req, res, next) {
@@ -78,12 +114,27 @@ async function createProduct(req, res, next) {
     try {
         product = await dataWorker.Create(package);
     } catch (err) {
+        if (err.message === "same Product") {
+            return res.json({
+                code: 401,
+                message: "A product with the same name exists",
+            });
+        } else if (err.message === "form Null") {
+            return res.json({
+                code: 401,
+                message: "One of the forms is not filled in",
+            });
+        }
         return next(err);
     }
 
-    const result = JSON.stringify(product);
+    const result = product;
     const message = "The product has been created";
-    res.status(201).render("productCreate", { message, result });
+    res.status(201).json({
+        code: 201,
+        message,
+        result,
+    });
 }
 
 async function modifyProduct(req, res, next) {
@@ -130,6 +181,7 @@ async function removeProduct(req, res, next) {
 }
 
 module.exports = {
+    productQuarter,
     getProductDetailById,
     getProductDetailByName,
     getProductMain,
