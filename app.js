@@ -6,15 +6,13 @@ const cors = require("cors");
 const favicon = require("serve-favicon");
 const nunjucks = require("nunjucks");
 const session = require("express-session");
-const passport = require("passport");
-const passportConfig = require("./passport");
 
 const { sequelize } = require("./models");
 
 dotenv.config();
 
 const app = express();
-passportConfig();
+
 app.set("port", process.env.PORT || 5147);
 app.set("view engine", "html");
 nunjucks.configure("views", {
@@ -47,19 +45,13 @@ app.use(
     })
 );
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-const productRouter = require("./routes/products.js");
+const productRouter = require("./routes/products");
 const authRouter = require("./routes/auth");
-const errPro = require("./errors/errorProcessor");
-
-app.get("/", (req, res) => {
-    res.status(200).render("expressAPI.html");
-});
+const userRouter = require("./routes/user");
 
 app.use("/products", productRouter);
 app.use("/auth", authRouter);
+app.use("/user", userRouter);
 
 app.use((req, res, next) => {
     const error = new Error(`${req.method} ${req.url} does not exist`);
@@ -69,7 +61,11 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
     console.log(" ### Error Detected! ###");
-    errPro(err, res);
+    res.locals.message = err.message;
+    res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
+    res.locals.error.status = 500;
+    console.error(err);
+    res.status(500).render("error");
 });
 
 app.listen(app.get("port"), () => {

@@ -1,19 +1,30 @@
-const passport = require("passport");
 const User = require("../models/users");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-async function FindEmail(email) {
+async function FindEmail(email, message) {
     let exEmail;
+    if (message === "use to join") {
+        try {
+            exEmail = await User.findOne({ where: { email } });
+        } catch (err) {
+            throw err;
+        }
 
-    try {
-        exEmail = await User.findOne({ where: { email } });
-    } catch (err) {
-        throw err;
+        if (exEmail !== null) throw new Error("Exist Email");
+        return email;
+    } else {
+        try {
+            exEmail = await User.findOne({ where: { email } });
+        } catch (err) {
+            throw err;
+        }
+
+        if (exEmail === null) throw new Error("Nonexist Email");
+        return exEmail;
     }
-
-    if (exEmail !== null) throw new Error("Exist Email");
-    return email;
 }
+
 async function FindNick(nickname) {
     let exNick;
 
@@ -44,6 +55,7 @@ async function MakeUser(exEmail, exNick, hash) {
 
     try {
         user = await User.create({
+            id: Date.now().toString(),
             email: exEmail,
             nickname: exNick,
             password: hash,
@@ -51,35 +63,37 @@ async function MakeUser(exEmail, exNick, hash) {
     } catch (err) {
         throw err;
     }
-
-    return user;
+    const token = createJwtToken(user);
+    return { user, token };
 }
 
-async function getAuth(req, res, next) {
+async function FindPassword(password, user) {
+    let exPassword;
+
     try {
-        passport.authenticate("local", (authError, user) => {
-            if (authError) {
-                return new Error(authError);
-            }
-            if (!user) {
-                return new Error("err");
-            }
-            return req.login(user, (loginError) => {
-                if (loginError) {
-                    return next(loginError);
-                }
-                return res.send("로그인 되었습니다.");
-            });
-        })(req, res, next);
+        exPassword = await bcrypt.compare(password, user.password);
+
+        if (exPassword === false) {
+            throw new Error("Invalid Password");
+        }
     } catch (err) {
         throw err;
     }
+
+    return exPassword;
+}
+
+function createJwtToken(user) {
+    return jwt.sign({ user }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+    });
 }
 
 module.exports = {
     FindEmail,
     FindNick,
+    FindPassword,
     MakeHash,
     MakeUser,
-    getAuth,
+    createJwtToken,
 };

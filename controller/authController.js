@@ -2,27 +2,68 @@ const dataWorker = require("../data/authData");
 
 async function join(req, res, next) {
     const { email, nickname, password } = req.body;
-    let user;
+    const message = "use to join";
+    let result;
 
     try {
-        const exEmail = await dataWorker.FindEmail(email);
+        const exEmail = await dataWorker.FindEmail(email, message);
         const exNick = await dataWorker.FindNick(nickname);
         const hash = await dataWorker.MakeHash(password);
-        user = await dataWorker.MakeUser(exEmail, exNick, hash);
+        result = await dataWorker.MakeUser(exEmail, exNick, hash);
     } catch (err) {
+        if (err.message === "Exist Email") {
+            return res.status(401).json({
+                code: 401,
+                message: "Failed to join, The email is exist",
+            });
+        } else if (err.message === "Exist Nickname") {
+            return res.status(401).json({
+                code: 401,
+                message: "Failed to join, The nickname is exist",
+            });
+        }
         return next(err);
     }
 
-    console.log(`user has been created like this ${user.dataValues}`);
-    res.status(201).redirect("/");
+    return res.status(201).json({
+        code: 201,
+        message: "Sucess to join",
+        result,
+    });
 }
 
 async function login(req, res, next) {
+    const { email, password } = req.body;
+    const message = "use to login";
+    let user;
+
     try {
-        dataWorker.getAuth(req, res, next);
+        user = await dataWorker.FindEmail(email, message);
+        await dataWorker.FindPassword(password, user);
     } catch (err) {
+        if (err.message === "Nonexist Email") {
+            return res.status(401).json({
+                code: 401,
+                message: "Failed to login, The email or password are invalid",
+            });
+        } else if (err.message === "Invalid Password") {
+            return res.status(401).json({
+                code: 401,
+                message: "Failed to login, The email or password are invalid",
+            });
+        }
         return next(err);
     }
+    const token = dataWorker.createJwtToken(user);
+    const result = {};
+
+    result.user = user;
+    result.token = token;
+    return res.status(200).json({
+        code: 200,
+        message: "Sucess to login",
+        result,
+    });
 }
 
 async function logout(req, res, next) {

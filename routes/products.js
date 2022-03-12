@@ -4,7 +4,7 @@ const router = express.Router();
 
 router
     .route("/")
-    .get(controllWorker.productQuarter)
+    .get(controllWorker.routeQuarter)
     .get(controllWorker.getProductDetailByName)
     .get(controllWorker.getProductMain)
     .post(controllWorker.createProduct);

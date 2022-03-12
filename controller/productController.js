@@ -1,6 +1,6 @@
 const dataWorker = require("../data/productData");
 
-async function productQuarter(req, res, next) {
+async function routeQuarter(req, res, next) {
     if (req.query.name) {
         getProductDetailByName(req, res, next);
     } else {
@@ -61,6 +61,7 @@ async function getProductDetailByName(req, res, next) {
     productPrice = product.price;
     productOrigin = product.origin;
     productType = product.type;
+
     return res.json({
         code: 200,
         message: "Sucess to get product's info by name",
@@ -90,17 +91,17 @@ async function getProductMain(req, res, next) {
         return productNames[0];
     });
 
-    const productIds = products.map((value, index) => {
-        const productIds = [];
-        productIds.push(products[index].id);
+    // const productIds = products.map((value, index) => {
+    //     const productIds = [];
+    //     productIds.push(products[index].id);
 
-        return productIds[0];
-    });
+    //     return productIds[0];
+    // });
 
     productNames.shift();
-    productIds.shift();
+    // productIds.shift();
 
-    res.json({
+    return res.json({
         code: 200,
         message: "Sucess to get all product's name",
         result: { productNames },
@@ -109,18 +110,18 @@ async function getProductMain(req, res, next) {
 
 async function createProduct(req, res, next) {
     const package = req.body;
-    let product;
+    let result;
 
     try {
-        product = await dataWorker.Create(package);
+        result = await dataWorker.Create(package);
     } catch (err) {
         if (err.message === "same Product") {
-            return res.json({
+            return res.status(401).json({
                 code: 401,
                 message: "A product with the same name exists",
             });
         } else if (err.message === "form Null") {
-            return res.json({
+            return res.status(401).json({
                 code: 401,
                 message: "One of the forms is not filled in",
             });
@@ -128,11 +129,9 @@ async function createProduct(req, res, next) {
         return next(err);
     }
 
-    const result = product;
-    const message = "The product has been created";
-    res.status(201).json({
+    return res.status(201).json({
         code: 201,
-        message,
+        message: "The product has been created",
         result,
     });
 }
@@ -140,48 +139,50 @@ async function createProduct(req, res, next) {
 async function modifyProduct(req, res, next) {
     const paramsId = req.params.id;
     const package = req.body;
-    let getOld;
-    let getNew;
+    let result;
 
     try {
-        getOld = await dataWorker.getBefore(paramsId);
         await dataWorker.Update(package, paramsId);
-        getNew = await dataWorker.getAfter(paramsId);
+        result = await dataWorker.GetResult(paramsId);
     } catch (err) {
+        if (err.message === "same Product") {
+            return res.status(401).json({
+                code: 401,
+                message: "A product with the same name exists",
+            });
+        } else if (err.message === "form Null") {
+            return res.status(401).json({
+                code: 401,
+                message: "One of the forms is not filled in",
+            });
+        }
         return next(err);
     }
 
-    const message = "The product's info has been modified";
-    res.status(200).render("productUpdateDelete", {
-        message,
-        getOld,
-        getNew,
+    return res.status(200).json({
+        code: 200,
+        message: "The product's info has been modified",
+        result,
     });
 }
 
 async function removeProduct(req, res, next) {
     const paramsId = req.params.id;
-    let getOld;
-    let getNew;
 
     try {
-        getOld = await dataWorker.getBefore(paramsId);
         await dataWorker.Destroy(paramsId);
-        getNew = await dataWorker.getAfter(paramsId);
     } catch (err) {
         return next(err);
     }
 
-    const message = "The product's info has been removed ";
-    res.status(203).render("productUpdateDelete", {
-        message,
-        getOld,
-        getNew,
+    return res.status(203).json({
+        code: 203,
+        message: "The product's info has been removed",
     });
 }
 
 module.exports = {
-    productQuarter,
+    routeQuarter,
     getProductDetailById,
     getProductDetailByName,
     getProductMain,

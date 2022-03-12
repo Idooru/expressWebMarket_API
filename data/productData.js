@@ -35,36 +35,19 @@ async function FindAll() {
     return products;
 }
 
-async function getBefore(id) {
-    let BeforeProducts;
-
-    try {
-        BeforeProducts = await Product.findOne({ where: { id } });
-    } catch (err) {
-        throw err;
-    }
-
-    if (BeforeProducts === null) throw new Error("no Product");
-    BeforeProducts = JSON.stringify(BeforeProducts.dataValues);
-
-    return BeforeProducts;
-}
-
-async function getAfter(id) {
+async function GetResult(paramsId) {
     let AfterProducts;
 
     try {
         AfterProducts = await Product.findOne({
-            where: { id },
+            where: { id: paramsId },
         });
     } catch (err) {
         throw err;
     }
 
     AfterProducts =
-        AfterProducts === null
-            ? "removed"
-            : JSON.stringify(AfterProducts.dataValues);
+        AfterProducts === null ? "removed" : AfterProducts.dataValues;
     return AfterProducts;
 }
 
@@ -81,16 +64,10 @@ async function Create(package) {
             type,
         });
     } catch (err) {
-        if (err.message === "Validation error") {
+        let errMessage = err.message;
+        if (errMessage === "Validation error") {
             throw new Error("same Product");
-        } else if (
-            err.message ===
-            ("notNull Violation: Product.id cannot be null" &&
-                "notNull Violation: Product.name cannot be null" &&
-                "notNull Violation: Product.price cannot be null" &&
-                "notNull Violation: Product.origin cannot be null" &&
-                "notNull Violation: Product.type cannot be null")
-        ) {
+        } else if (errMessage.startsWith("notNull Violation")) {
             throw new Error("form Null");
         } else throw err;
     }
@@ -113,17 +90,11 @@ async function Update(package, paramsId) {
             }
         );
     } catch (err) {
-        if (err.message === "Validation error") {
+        let errMessage = err.message;
+        if (errMessage === "Validation error") {
             throw new Error("same Product");
-        } else if (
-            err.message ===
-            ("notNull Violation: Product.id cannot be null" &&
-                "notNull Violation: Product.name cannot be null" &&
-                "notNull Violation: Product.price cannot be null" &&
-                "notNull Violation: Product.origin cannot be null" &&
-                "notNull Violation: Product.type cannot be null")
-        ) {
-            throw new Error("Form Null");
+        } else if (errMessage.startsWith("notNull Violation")) {
+            throw new Error("form Null");
         } else throw err;
     }
 }
@@ -141,8 +112,7 @@ async function Destroy(paramsId) {
 module.exports = {
     FindOne,
     FindAll,
-    getBefore,
-    getAfter,
+    GetResult,
     Create,
     Update,
     Destroy,

@@ -4,12 +4,6 @@ class Product extends Sequelize.Model {
     static init(sequelize) {
         return super.init(
             {
-                id: {
-                    type: Sequelize.STRING(13),
-                    allowNull: false,
-                    unique: true,
-                    primaryKey: true,
-                },
                 name: {
                     type: Sequelize.STRING(20),
                     allowNull: false,
