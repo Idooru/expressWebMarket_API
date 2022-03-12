@@ -27,7 +27,7 @@ async function join(req, res, next) {
 
     return res.status(201).json({
         code: 201,
-        message: "Sucess to join",
+        message: "Sucess to join and a token has been verifyed",
         result,
     });
 }
@@ -61,8 +61,21 @@ async function login(req, res, next) {
     result.token = token;
     return res.status(200).json({
         code: 200,
-        message: "Sucess to login",
+        message: "Sucess to login and a token has been verifyed",
         result,
+    });
+}
+
+async function me(req, res, next) {
+    const nickname = req.decoded.user.nickname;
+    const profile = req.decoded.user;
+    return res.status(200).json({
+        code: 200,
+        message: "토큰은 정상입니다.",
+        data: {
+            nickname,
+            profile,
+        },
     });
 }
 
@@ -75,5 +88,6 @@ async function logout(req, res, next) {
 module.exports = {
     join,
     login,
+    me,
     logout,
 };

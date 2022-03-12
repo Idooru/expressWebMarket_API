@@ -85,7 +85,7 @@ async function FindPassword(password, user) {
 
 function createJwtToken(user) {
     return jwt.sign({ user }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "1m",
     });
 }
 
