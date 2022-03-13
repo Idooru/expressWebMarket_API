@@ -6,7 +6,11 @@ module.exports = (req, res, next) => {
             req.headers.authorization,
             process.env.JWT_SECRET
         );
-        console.log("Sucess to authenticate");
+        if (req.decoded.user.email === process.env.MASTER_USER) {
+            req.isMaster = true;
+            return next();
+        }
+        
         return next();
     } catch (err) {
         if (err.name === "TokenExpiredError") {
@@ -14,11 +18,10 @@ module.exports = (req, res, next) => {
                 code: 419,
                 message: "The token has expired",
             });
-        } else if (err.name === "JsonWebTokenError") {
-            return res.status(401).json({
-                code: 401,
-                message: "The token is invalid",
-            });
         }
+        return res.status(401).json({
+            code: 401,
+            message: "The token is invalid",
+        });
     }
 };

@@ -1,14 +1,16 @@
 const dataWorker = require("../data/authData");
+const jwt = require("jsonwebtoken");
 
 async function join(req, res, next) {
-    const { email, nickname, password } = req.body;
+    const { email, nickname, password, repassword } = req.body;
     const message = "use to join";
     let result;
 
     try {
         const exEmail = await dataWorker.FindEmail(email, message);
         const exNick = await dataWorker.FindNick(nickname);
-        const hash = await dataWorker.MakeHash(password);
+        const exPass = dataWorker.MatchPass(password, repassword);
+        const hash = await dataWorker.MakeHash(exPass);
         result = await dataWorker.MakeUser(exEmail, exNick, hash);
     } catch (err) {
         if (err.message === "Exist Email") {
@@ -21,13 +23,18 @@ async function join(req, res, next) {
                 code: 401,
                 message: "Failed to join, The nickname is exist",
             });
+        } else if (err.message === "Password Inconsistency") {
+            return res.status(401).json({
+                code: 401,
+                message: "Failed to join, The password is not matching",
+            });
         }
         return next(err);
     }
 
     return res.status(201).json({
         code: 201,
-        message: "Sucess to join and a token has been verifyed",
+        message: "Sucess to join",
         result,
     });
 }
@@ -66,23 +73,37 @@ async function login(req, res, next) {
     });
 }
 
-async function me(req, res, next) {
+async function me(req, res) {
     const nickname = req.decoded.user.nickname;
-    const profile = req.decoded.user;
+    const authority = req.authority;
+    if (req.authority === "master") {
+        return res.status(200).json({
+            code: 200,
+            message: "The token is valid, welcome master",
+            nickname,
+            authority,
+        });
+    }
     return res.status(200).json({
         code: 200,
-        message: "토큰은 정상입니다.",
-        data: {
-            nickname,
-            profile,
-        },
+        message: "The tokein is valid",
+        nickname,
+        authority,
     });
 }
 
 async function logout(req, res, next) {
-    req.session.destroy();
-    req.logout();
-    res.redirect("/");
+    let jwtToken = jwt.verify(
+        req.headers.authorization,
+        process.env.JWT_SECRET
+    );
+    jwtToken = "";
+
+    return res.status(200).json({
+        code: 200,
+        message: "Sucess to logout",
+        jwtToken,
+    });
 }
 
 module.exports = {

@@ -38,6 +38,13 @@ async function FindNick(nickname) {
     return nickname;
 }
 
+function MatchPass(password, repassword) {
+    if (password === repassword) {
+        return password;
+    }
+    throw new Error("Password Inconsistency");
+}
+
 async function MakeHash(password) {
     let result;
 
@@ -63,8 +70,8 @@ async function MakeUser(exEmail, exNick, hash) {
     } catch (err) {
         throw err;
     }
-    const token = createJwtToken(user);
-    return { user, token };
+
+    return user;
 }
 
 async function FindPassword(password, user) {
@@ -84,8 +91,9 @@ async function FindPassword(password, user) {
 }
 
 function createJwtToken(user) {
+    delete user.dataValues.password;
     return jwt.sign({ user }, process.env.JWT_SECRET, {
-        expiresIn: "1m",
+        expiresIn: "5m",
     });
 }
 
@@ -95,5 +103,6 @@ module.exports = {
     FindPassword,
     MakeHash,
     MakeUser,
+    MatchPass,
     createJwtToken,
 };
