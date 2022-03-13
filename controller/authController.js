@@ -14,16 +14,19 @@ async function join(req, res, next) {
         result = await dataWorker.MakeUser(exEmail, exNick, hash);
     } catch (err) {
         if (err.message === "Exist Email") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "Failed to join, The email is exist",
             });
         } else if (err.message === "Exist Nickname") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "Failed to join, The nickname is exist",
             });
         } else if (err.message === "Password Inconsistency") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "Failed to join, The password is not matching",
@@ -49,11 +52,13 @@ async function login(req, res, next) {
         await dataWorker.FindPassword(password, user);
     } catch (err) {
         if (err.message === "Nonexist Email") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "Failed to login, The email or password are invalid",
             });
         } else if (err.message === "Invalid Password") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "Failed to login, The email or password are invalid",

@@ -18,6 +18,7 @@ async function getProductDetailById(req, res, next) {
         product = await dataWorker.FindOne(check);
     } catch (err) {
         if (err.message === "no Product") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "Failed to get product's info by id",
@@ -48,6 +49,7 @@ async function getProductDetailByName(req, res, next) {
         product = await dataWorker.FindOne(check);
     } catch (err) {
         if (err.message === "no Product") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "Failed to get product's info by name",
@@ -76,6 +78,7 @@ async function getProductMain(req, res, next) {
         products = await dataWorker.FindAll();
     } catch (err) {
         if (err.message === "no Product") {
+            console.error(err);
             return res.status(500).json({
                 code: 500,
                 message: "There is no product, Add product more!",
@@ -116,11 +119,13 @@ async function createProduct(req, res, next) {
         result = await dataWorker.Create(package);
     } catch (err) {
         if (err.message === "same Product") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "A product with the same name exists",
             });
         } else if (err.message === "form Null") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "One of the forms is not filled in",
@@ -146,11 +151,13 @@ async function modifyProduct(req, res, next) {
         result = await dataWorker.GetResult(paramsId);
     } catch (err) {
         if (err.message === "same Product") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "A product with the same name exists",
             });
         } else if (err.message === "form Null") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "One of the forms is not filled in",
@@ -172,6 +179,7 @@ async function removeProduct(req, res, next) {
     try {
         await dataWorker.Destroy(paramsId);
     } catch (err) {
+        console.error(err);
         return next(err);
     }
 

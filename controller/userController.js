@@ -10,11 +10,13 @@ async function modifyUser(req, res, next) {
         result = await dataWorker.GetResult(paramsId);
     } catch (err) {
         if (err.message === "same User") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "A user with the same name exists",
             });
         } else if (err.message === "form Null") {
+            console.error(err);
             return res.status(401).json({
                 code: 401,
                 message: "One of the forms is not filled in",
@@ -36,6 +38,7 @@ async function removeUser(req, res, next) {
     try {
         await dataWorker.Destroy(paramsId);
     } catch (err) {
+        console.error(err);
         return next(err);
     }
 
