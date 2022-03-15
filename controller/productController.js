@@ -32,7 +32,8 @@ async function getProductDetailById(req, res, next) {
     productPrice = product.price;
     productOrigin = product.origin;
     productType = product.type;
-    return res.json({
+
+    return res.json({   
         code: 200,
         message: "Sucess to get product's info by id",
         result: { id, productName, productPrice, productOrigin, productType },

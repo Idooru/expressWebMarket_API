@@ -3,9 +3,11 @@ const express = require("express");
 const controllWorker = require("../controller/productController");
 const isLogin = require("../middlewares/isLogin");
 const isMaster = require("../middlewares/isMaster");
+const limiter = require("../middlewares/limiter");
 
 const router = express.Router();
 
+router.use(limiter);
 router
     .route("/")
     .get(controllWorker.routeQuarter)

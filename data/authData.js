@@ -93,7 +93,7 @@ async function FindPassword(password, user) {
 function createJwtToken(user) {
     delete user.dataValues.password;
     return jwt.sign({ user }, process.env.JWT_SECRET, {
-        expiresIn: "5m",
+        expiresIn: "1h",
     });
 }
 

@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
             req.isMaster = true;
             return next();
         }
-        
+
         return next();
     } catch (err) {
         if (err.name === "TokenExpiredError") {
