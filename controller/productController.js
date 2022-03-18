@@ -10,18 +10,17 @@ async function routeQuarter(req, res, next) {
 
 async function getProductDetailById(req, res, next) {
     const paramsId = req.params.id;
-    const check = new Object();
-    check.id = paramsId;
+    const message = "By id";
     let product;
 
     try {
-        product = await dataWorker.FindOne(check);
+        product = await dataWorker.FindOne(paramsId, message);
     } catch (err) {
         if (err.message === "no Product") {
             console.error(err);
-            return res.status(401).json({
-                code: 401,
-                message: "Failed to get product's info by id",
+            return res.status(404).json({
+                code: 404,
+                message: `Failed to get product's info by id of ${err.noneData}`,
             });
         }
         return next(err);
@@ -33,7 +32,7 @@ async function getProductDetailById(req, res, next) {
     productOrigin = product.origin;
     productType = product.type;
 
-    return res.json({   
+    return res.json({
         code: 200,
         message: "Sucess to get product's info by id",
         result: { id, productName, productPrice, productOrigin, productType },
@@ -42,18 +41,17 @@ async function getProductDetailById(req, res, next) {
 
 async function getProductDetailByName(req, res, next) {
     const querryName = decodeURIComponent(req.query.name);
-    const check = new Object();
-    check.name = querryName;
+    const message = "By name";
     let product;
 
     try {
-        product = await dataWorker.FindOne(check);
+        product = await dataWorker.FindOne(querryName, message);
     } catch (err) {
         if (err.message === "no Product") {
             console.error(err);
-            return res.status(401).json({
-                code: 401,
-                message: "Failed to get product's info by name",
+            return res.status(404).json({
+                code: 404,
+                message: `Failed to get product's info by name of ${err.noneData}`,
             });
         }
         return next(err);
@@ -88,12 +86,12 @@ async function getProductMain(req, res, next) {
         return next(err);
     }
 
-    const productNames = products.map((value, index) => {
-        const productNames = [];
-        productNames.push(products[index].name);
+    // const productNames = products.map((value, index) => {
+    //     const productNames = [];
+    //     productNames.push(products[index].name);
 
-        return productNames[0];
-    });
+    //     return productNames[0];
+    // }); 임시 주석
 
     // const productIds = products.map((value, index) => {
     //     const productIds = [];
@@ -102,13 +100,14 @@ async function getProductMain(req, res, next) {
     //     return productIds[0];
     // });
 
-    productNames.shift();
+    products.shift();
+    // productNames.shift(); 임시 주석
     // productIds.shift();
 
     return res.json({
         code: 200,
         message: "Sucess to get all product's name",
-        result: { productNames },
+        result: products,
     });
 }
 

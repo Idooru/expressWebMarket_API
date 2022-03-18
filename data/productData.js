@@ -1,22 +1,23 @@
 const Product = require("../models/products");
 
-async function FindOne(check) {
+async function FindOne(data, message) {
     let product;
-    let checker;
 
     try {
-        if (check.id) {
-            checker = check.id;
-            product = await Product.findOne({ where: { id: checker } });
+        if (message === "By id") {
+            product = await Product.findOne({ where: { id: data } });
         } else {
-            checker = check.name;
-            product = await Product.findOne({ where: { name: checker } });
+            product = await Product.findOne({ where: { name: data } });
         }
     } catch (err) {
         throw err;
     }
 
-    if (product === null) throw new Error("no Product");
+    if (product === null) {
+        const error = new Error("no Product");
+        error.noneData = data;
+        throw error;
+    }
 
     return product;
 }
@@ -46,8 +47,7 @@ async function GetResult(paramsId) {
         throw err;
     }
 
-    AfterProducts =
-        AfterProducts === null ? "removed" : AfterProducts.dataValues;
+    AfterProducts = AfterProducts === null ? "removed" : AfterProducts.dataValues;
     return AfterProducts;
 }
 

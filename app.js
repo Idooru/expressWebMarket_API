@@ -19,12 +19,21 @@ nunjucks.configure("views", {
     express: app,
     watch: true,
 });
-sequelize
-    .sync({ force: false })
-    .then(() => {
+// sequelize
+//     .sync({ force: false })
+//     .then(() => {
+//         console.log("SQL 연결 성공!");
+//     })
+//     .catch(console.error);
+
+(async () => {
+    try {
+        await sequelize.sync({ force: false });
         console.log("SQL 연결 성공!");
-    })
-    .catch(console.error);
+    } catch (err) {
+        console.error(err);
+    }
+})();
 
 app.use(morgan("dev"));
 app.use(cors());
@@ -69,9 +78,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(app.get("port"), () => {
-    console.log(
-        `### API server is running at http://localhost:${app.get("port")} ###`
-    );
+    console.log(`### API server is running at http://localhost:${app.get("port")} ###`);
 });
 
 // expressWebMarket_ApiServer

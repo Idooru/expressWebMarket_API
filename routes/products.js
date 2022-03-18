@@ -16,7 +16,7 @@ router
     .post(isLogin, isMaster, controllWorker.createProduct);
 router
     .route("/:id")
-    .get(isLogin, isMaster, controllWorker.getProductDetailById)
+    .get(controllWorker.getProductDetailById)
     .patch(isLogin, isMaster, controllWorker.modifyProduct)
     .delete(isLogin, isMaster, controllWorker.removeProduct);
 
