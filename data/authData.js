@@ -2,27 +2,75 @@ const User = require("../models/users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-async function FindEmail(email, message) {
-    let exEmail;
-    if (message === "use to join") {
-        try {
-            exEmail = await User.findOne({ where: { email } });
-        } catch (err) {
-            throw err;
-        }
-
-        if (exEmail !== null) throw new Error("Exist Email");
-        return email;
+function checkToLogin(auth) {
+    if (auth) {
+        return false;
     } else {
-        try {
-            exEmail = await User.findOne({ where: { email } });
-        } catch (err) {
-            throw err;
-        }
-
-        if (exEmail === null) throw new Error("Nonexist Email");
-        return exEmail;
+        return true;
     }
+}
+
+async function FindEmailToJoin(email) {
+    let exEmail;
+
+    try {
+        exEmail = await User.findOne({ where: { email } });
+    } catch (err) {
+        throw err;
+    }
+
+    if (exEmail !== null) throw new Error("Exist Email");
+    return email;
+}
+
+async function FindUserToLogin(email) {
+    let user;
+    try {
+        user = await User.findOne({ where: { email } });
+    } catch (err) {
+        throw err;
+    }
+
+    if (user === null) throw new Error("Nonexist Email");
+    return user;
+}
+
+async function FindEmailToGet(id) {
+    let exId;
+    try {
+        exId = await User.findOne({ where: { id } });
+    } catch (err) {
+        throw err;
+    }
+
+    if (exId === null) throw new Error("Nonexist Id");
+    return exId.dataValues.email;
+}
+
+async function FindUserToCheck(email) {
+    let user;
+
+    try {
+        user = await User.findOne({ where: { email } });
+    } catch (err) {
+        throw err;
+    }
+
+    if (user === null) throw new Error("Nonexist User");
+    return user;
+}
+
+async function MatchPasswordToModify(nowPassword, userPassword) {
+    let isPasswordCorrect;
+
+    try {
+        isPasswordCorrect = await bcrypt.compare(nowPassword, userPassword);
+    } catch (err) {
+        throw err;
+    }
+
+    if (isPasswordCorrect === false) throw new Error("Password does not match");
+    return isPasswordCorrect;
 }
 
 async function FindNick(nickname) {
@@ -38,7 +86,7 @@ async function FindNick(nickname) {
     return nickname;
 }
 
-function MatchPass(password, repassword) {
+function MatchPasswordToLogin(password, repassword) {
     if (password === repassword) {
         return password;
     }
@@ -46,15 +94,15 @@ function MatchPass(password, repassword) {
 }
 
 async function MakeHash(password) {
-    let result;
+    let hashed;
 
     try {
-        result = await bcrypt.hash(password, 12);
+        hashed = await bcrypt.hash(password, 12);
     } catch (err) {
         throw err;
     }
 
-    return result;
+    return hashed;
 }
 
 async function MakeUser(exEmail, exNick, hash) {
@@ -98,11 +146,16 @@ function createJwtToken(user) {
 }
 
 module.exports = {
-    FindEmail,
+    checkToLogin,
+    FindEmailToJoin,
+    FindEmailToGet,
+    FindUserToLogin,
+    FindUserToCheck,
+    MatchPasswordToModify,
     FindNick,
     FindPassword,
     MakeHash,
     MakeUser,
-    MatchPass,
+    MatchPasswordToLogin,
     createJwtToken,
 };

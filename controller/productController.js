@@ -40,12 +40,12 @@ async function getProductDetailById(req, res, next) {
 }
 
 async function getProductDetailByName(req, res, next) {
-    const querryName = decodeURIComponent(req.query.name);
+    const queryName = decodeURIComponent(req.query.name);
     const message = "By name";
     let product;
 
     try {
-        product = await dataWorker.FindOne(querryName, message);
+        product = await dataWorker.FindOne(queryName, message);
     } catch (err) {
         if (err.message === "no Product") {
             console.error(err);

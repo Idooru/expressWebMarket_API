@@ -8,6 +8,10 @@ const limiter = require("../middlewares/limiter");
 const router = express.Router();
 
 router.use(limiter);
+
+router.use("/user", controllWorker.routeQuarter);
+router.get("/user", controllWorker.checkEmail);
+router.post("/user", controllWorker.changePassword);
 router.post("/join", controllWorker.join);
 router.post("/login", controllWorker.login);
 router.get("/me", isLogin, whoami, controllWorker.me);
