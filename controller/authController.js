@@ -116,26 +116,38 @@ async function checkEmail(req, res, next) {
 }
 
 async function changePassword(req, res, next) {
-    const { nowPassword, newPassword } = req.body;
+    const { inputedPassword, newPassword } = req.body;
     const { email } = req.query;
+    let hashed;
 
     try {
         const user = await dataWorker.FindUserToCheck(email);
-        const userPassword = user.dataValues.password;
+        const currentPassword = user.dataValues.password;
+        const userId = user.dataValues.id;
 
-        await dataWorker.MatchPasswordToModify(nowPassword, userPassword);
+        await dataWorker.MatchPasswordToModify(inputedPassword, currentPassword);
+        hashed = await dataWorker.MakeHash(newPassword);
+        await dataWorker.ModifyPassword(hashed, userId);
     } catch (err) {
         if (err.message === "Nonexist User") {
             return res.status(401).json({
                 code: 401,
                 message: "Failed to find, The user is nonexist",
             });
+        } else if (err.message === "Password does not match") {
+            return res.status(401).json({
+                code: 401,
+                message: "This passwords do not match",
+            });
         }
         console.error(err);
         return next(err);
     }
 
-    res.send("Test");
+    res.status(200).json({
+        code: 200,
+        message: "Sucess to modify password",
+    });
 }
 
 async function me(req, res) {

@@ -60,17 +60,35 @@ async function FindUserToCheck(email) {
     return user;
 }
 
-async function MatchPasswordToModify(nowPassword, userPassword) {
+async function MatchPasswordToModify(inputedPassword, currentPassword) {
     let isPasswordCorrect;
 
     try {
-        isPasswordCorrect = await bcrypt.compare(nowPassword, userPassword);
+        isPasswordCorrect = await bcrypt.compare(inputedPassword, currentPassword);
     } catch (err) {
         throw err;
     }
 
     if (isPasswordCorrect === false) throw new Error("Password does not match");
-    return isPasswordCorrect;
+}
+
+async function ModifyPassword(newPassword, userId) {
+    let modifiedPassword;
+
+    try {
+        modifiedPassword = await User.update(
+            {
+                password: newPassword,
+            },
+            {
+                where: { id: userId },
+            }
+        );
+    } catch (err) {
+        throw err;
+    }
+
+    return modifiedPassword;
 }
 
 async function FindNick(nickname) {
@@ -152,6 +170,7 @@ module.exports = {
     FindUserToLogin,
     FindUserToCheck,
     MatchPasswordToModify,
+    ModifyPassword,
     FindNick,
     FindPassword,
     MakeHash,
