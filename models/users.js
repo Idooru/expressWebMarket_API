@@ -1,9 +1,14 @@
 const Sequelize = require("sequelize");
 
-class User extends Sequelize.Model {
+module.exports = class User extends Sequelize.Model {
     static init(sequelize) {
         return super.init(
             {
+                usernumber: {
+                    type: Sequelize.STRING(25),
+                    unique: true,
+                    allowNull: false,
+                },
                 email: {
                     type: Sequelize.STRING(25),
                     unique: true,
@@ -21,7 +26,7 @@ class User extends Sequelize.Model {
             },
             {
                 sequelize,
-                timestamps: true,
+                timestamps: false,
                 underscored: false,
                 paranoid: false,
                 modelName: "User",
@@ -31,6 +36,7 @@ class User extends Sequelize.Model {
             }
         );
     }
-}
-
-module.exports = User;
+    static associate(db) {
+        db.User.hasOne(db.Auth);
+    }
+};

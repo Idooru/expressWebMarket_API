@@ -13,10 +13,11 @@ async function join(req, res, next) {
 
     try {
         const exEmail = await dataWorker.FindEmailToJoin(email);
+        const userType = dataWorker.KnowAccountType(exEmail);
         const exNick = await dataWorker.FindNick(nickname);
         const exPass = dataWorker.MatchPasswordToLogin(password, repassword);
         const hash = await dataWorker.MakeHash(exPass);
-        result = await dataWorker.MakeUser(exEmail, exNick, hash);
+        result = await dataWorker.MakeUser(exEmail, exNick, hash, userType);
     } catch (err) {
         if (err.message === "Exist Email") {
             console.error(err);

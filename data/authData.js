@@ -1,4 +1,5 @@
 const User = require("../models/users");
+const Auth = require("../models/auths");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -21,6 +22,11 @@ async function FindEmailToJoin(email) {
 
     if (exEmail !== null) throw new Error("Exist Email");
     return email;
+}
+
+function KnowAccountType(exEmail) {
+    if (exEmail === "shere1765@gmail.com") return "master";
+    else return "user";
 }
 
 async function FindUserToLogin(email) {
@@ -123,21 +129,39 @@ async function MakeHash(password) {
     return hashed;
 }
 
-async function MakeUser(exEmail, exNick, hash) {
+async function MakeUser(exEmail, exNick, hash, userType) {
     let user;
+    let auth;
+    let result = {};
+    let userSecret = (() => {
+        let result = "";
+        const character = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        const characterLength = character.length;
+
+        for (let i = 0; i < length; i++) {
+            result += character.charAt(Math.floor(Math.random() * characterLength));
+        }
+
+        return result;
+    })((length = 50));
 
     try {
         user = await User.create({
-            id: Date.now().toString(),
+            usernumber: Date.now().toString(),
             email: exEmail,
-            nickname: exNick,
             password: hash,
+            nickname: exNick,
+        });
+        auth = await Auth.create({
+            userType,
+            userSecret,
         });
     } catch (err) {
         throw err;
     }
 
-    return user;
+    result = Object.assign(user.dataValues, auth.dataValues);
+    return result;
 }
 
 async function FindPassword(password, user) {
@@ -177,4 +201,5 @@ module.exports = {
     MakeUser,
     MatchPasswordToLogin,
     createJwtToken,
+    KnowAccountType,
 };

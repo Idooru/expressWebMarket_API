@@ -4,7 +4,7 @@ module.exports = {
     development: {
         username: "root",
         password: process.env.SEQUELIZE_PASSWORD,
-        database: "expressapi",
+        database: "expressWebMarket_API_SERVER",
         host: "127.0.0.1",
         dialect: "mysql",
     },
