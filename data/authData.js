@@ -15,18 +15,13 @@ async function FindEmailToJoin(email) {
     let exEmail;
 
     try {
-        exEmail = await User.findOne({ where: { email } });
+        exEmail = await User.findOne({ where: { email }, attributes: ["email"] });
     } catch (err) {
         throw err;
     }
 
     if (exEmail !== null) throw new Error("Exist Email");
     return email;
-}
-
-function KnowAccountType(exEmail) {
-    if (exEmail === "shere1765@gmail.com") return "master";
-    else return "user";
 }
 
 async function FindUserToLogin(email) {
@@ -44,13 +39,13 @@ async function FindUserToLogin(email) {
 async function FindEmailToGet(id) {
     let exId;
     try {
-        exId = await User.findOne({ where: { id } });
+        exId = await User.findOne({ where: { id }, attributes: ["email"] });
     } catch (err) {
         throw err;
     }
 
     if (exId === null) throw new Error("Nonexist Id");
-    return exId.dataValues.email;
+    return exId.email;
 }
 
 async function FindUserToCheck(email) {
@@ -129,10 +124,26 @@ async function MakeHash(password) {
     return hashed;
 }
 
-async function MakeUser(exEmail, exNick, hash, userType) {
+async function MakeUser(exEmail, exNick, hash) {
     let user;
+
+    try {
+        user = await User.create({
+            id: Date.now().toString(),
+            email: exEmail,
+            password: hash,
+            nickname: exNick,
+        });
+    } catch (err) {
+        throw err;
+    }
+
+    return user;
+}
+
+async function AddAuth(userId) {
     let auth;
-    let result = {};
+    let userEmail;
     let userSecret = (() => {
         let result = "";
         const character = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -146,22 +157,30 @@ async function MakeUser(exEmail, exNick, hash, userType) {
     })((length = 50));
 
     try {
-        user = await User.create({
-            usernumber: Date.now().toString(),
-            email: exEmail,
-            password: hash,
-            nickname: exNick,
+        userEmail = await User.findOne({
+            where: { id: userId },
+            attributes: ["email"],
         });
-        auth = await Auth.create({
-            userType,
-            userSecret,
-        });
+        userEmail = userEmail.email;
+
+        if (userEmail === "shere1765@gmail.com") {
+            auth = await Auth.create({
+                id: userId,
+                userType: "master",
+                userSecret,
+            });
+            return auth;
+        } else {
+            auth = await Auth.create({
+                id: userId,
+                userType: "user",
+                userSecret,
+            });
+            return auth;
+        }
     } catch (err) {
         throw err;
     }
-
-    result = Object.assign(user.dataValues, auth.dataValues);
-    return result;
 }
 
 async function FindPassword(password, user) {
@@ -199,7 +218,7 @@ module.exports = {
     FindPassword,
     MakeHash,
     MakeUser,
+    AddAuth,
     MatchPasswordToLogin,
     createJwtToken,
-    KnowAccountType,
 };

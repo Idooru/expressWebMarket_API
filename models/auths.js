@@ -16,7 +16,7 @@ module.exports = class Auth extends Sequelize.Model {
             },
             {
                 sequelize,
-                timestamps: true,
+                timestamps: false,
                 underscored: false,
                 paranoid: false,
                 modelName: "Auth",
@@ -25,6 +25,6 @@ module.exports = class Auth extends Sequelize.Model {
         );
     }
     static associate(db) {
-        db.Auth.belongsTo(db.User);
+        db.Auth.belongsTo(db.User, { sourceKey: "id" });
     }
 };

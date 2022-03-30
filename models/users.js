@@ -4,11 +4,6 @@ module.exports = class User extends Sequelize.Model {
     static init(sequelize) {
         return super.init(
             {
-                usernumber: {
-                    type: Sequelize.STRING(25),
-                    unique: true,
-                    allowNull: false,
-                },
                 email: {
                     type: Sequelize.STRING(25),
                     unique: true,
@@ -26,7 +21,7 @@ module.exports = class User extends Sequelize.Model {
             },
             {
                 sequelize,
-                timestamps: false,
+                timestamps: true,
                 underscored: false,
                 paranoid: false,
                 modelName: "User",
@@ -37,6 +32,6 @@ module.exports = class User extends Sequelize.Model {
         );
     }
     static associate(db) {
-        db.User.hasOne(db.Auth);
+        db.User.hasOne(db.Auth, { sourceKey: "id" });
     }
 };

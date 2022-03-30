@@ -9,15 +9,19 @@ async function routeQuarter(req, res, next) {
 
 async function join(req, res, next) {
     const { email, nickname, password, repassword } = req.body;
-    let result;
+    let user;
+    let auth;
+    let userId;
 
     try {
         const exEmail = await dataWorker.FindEmailToJoin(email);
-        const userType = dataWorker.KnowAccountType(exEmail);
         const exNick = await dataWorker.FindNick(nickname);
-        const exPass = dataWorker.MatchPasswordToLogin(password, repassword);
-        const hash = await dataWorker.MakeHash(exPass);
-        result = await dataWorker.MakeUser(exEmail, exNick, hash, userType);
+        const matchedPass = dataWorker.MatchPasswordToLogin(password, repassword);
+        const hash = await dataWorker.MakeHash(matchedPass);
+
+        user = await dataWorker.MakeUser(exEmail, exNick, hash);
+        userId = user.id;
+        auth = await dataWorker.AddAuth(userId);
     } catch (err) {
         if (err.message === "Exist Email") {
             console.error(err);
@@ -41,9 +45,11 @@ async function join(req, res, next) {
         return next(err);
     }
 
+    result = Object.assign(user.dataValues, auth.dataValues);
+
     return res.status(201).json({
         code: 201,
-        message: "Sucess to join",
+        message: "Sucess to join, and do not forget userSecret",
         result,
     });
 }
@@ -123,7 +129,7 @@ async function changePassword(req, res, next) {
 
     try {
         const user = await dataWorker.FindUserToCheck(email);
-        const currentPassword = user.dataValues.password;
+        const currentPassword = user.password;
         const userId = user.dataValues.id;
 
         await dataWorker.MatchPasswordToModify(inputedPassword, currentPassword);
