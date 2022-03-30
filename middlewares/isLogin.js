@@ -1,12 +1,17 @@
 const jwt = require("jsonwebtoken");
+const Auth = require("../models/auths");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
     try {
-        req.decoded = jwt.verify(
-            req.headers.authorization,
-            process.env.JWT_SECRET
-        );
-        if (req.decoded.user.email === process.env.MASTER_USER) {
+        req.decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
+        const userId = req.decoded.user.id;
+        let userType = await Auth.findOne({
+            where: { id: userId },
+            attributes: ["userType"],
+        });
+        userType = userType.userType;
+
+        if (userType === "master") {
             req.isMaster = true;
             return next();
         }

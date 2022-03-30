@@ -10,7 +10,7 @@ const router = express.Router();
 router.use(limiter);
 
 router.use("/user", controllWorker.routeQuarter);
-router.get("/user", controllWorker.checkEmail);
+router.get("/user", controllWorker.findEmail);
 router.post("/user", controllWorker.changePassword);
 router.post("/join", controllWorker.join);
 router.post("/login", controllWorker.login);

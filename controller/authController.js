@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 async function routeQuarter(req, res, next) {
     const { query } = req;
-    if (query.id) checkEmail(req, res, next);
+    if (query.secret) findEmail(req, res, next);
     else changePassword(req, res, next);
 }
 
@@ -98,12 +98,14 @@ async function login(req, res, next) {
     }
 }
 
-async function checkEmail(req, res, next) {
-    const queryId = req.query.id;
+async function findEmail(req, res, next) {
+    const querySecret = req.query.secret;
+    let id;
     let result;
 
     try {
-        result = await dataWorker.FindEmailToGet(queryId);
+        id = await dataWorker.FindId(querySecret);
+        result = await dataWorker.FindEmailToGet(id);
     } catch (err) {
         if (err.message === "Nonexist Id") {
             return res.status(401).json({
@@ -191,7 +193,7 @@ module.exports = {
     join,
     login,
     me,
-    checkEmail,
+    findEmail,
     changePassword,
     logout,
     routeQuarter,

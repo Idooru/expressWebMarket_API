@@ -36,16 +36,35 @@ async function FindUserToLogin(email) {
     return user;
 }
 
-async function FindEmailToGet(id) {
+async function FindId(querySecret) {
     let exId;
     try {
-        exId = await User.findOne({ where: { id }, attributes: ["email"] });
+        exId = await Auth.findOne({
+            where: { userSecret: querySecret },
+            attributes: ["id"],
+        });
     } catch (err) {
         throw err;
     }
+    exId = exId.id;
 
     if (exId === null) throw new Error("Nonexist Id");
-    return exId.email;
+    return exId;
+}
+
+async function FindEmailToGet(id) {
+    let exEmail;
+    try {
+        exEmail = await User.findOne({
+            where: { id },
+            attributes: ["email"],
+        });
+    } catch (err) {
+        throw err;
+    }
+    exEmail = exEmail.email;
+    
+    return exEmail;
 }
 
 async function FindUserToCheck(email) {
@@ -214,6 +233,7 @@ module.exports = {
     FindUserToCheck,
     MatchPasswordToModify,
     ModifyPassword,
+    FindId,
     FindNick,
     FindPassword,
     MakeHash,

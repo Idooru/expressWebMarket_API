@@ -4,7 +4,6 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const favicon = require("serve-favicon");
-const nunjucks = require("nunjucks");
 const session = require("express-session");
 
 const { sequelize } = require("./models");
@@ -14,17 +13,6 @@ dotenv.config();
 const app = express();
 
 app.set("port", process.env.PORT || 5147);
-app.set("view engine", "html");
-nunjucks.configure("views", {
-    express: app,
-    watch: true,
-});
-// sequelize
-//     .sync({ force: false })
-//     .then(() => {
-//         console.log("SQL 연결 성공!");
-//     })
-//     .catch(console.error);
 
 (async () => {
     try {
@@ -69,12 +57,12 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-    console.log(" ### Error Detected! ###");
-    res.locals.message = err.message;
-    res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
-    res.locals.error.status = 500;
-    console.error(err);
-    res.status(500).render("error");
+    const message = err.message;
+
+    res.status(500).json({
+        code: 500,
+        message,
+    });
 });
 
 app.listen(app.get("port"), () => {
