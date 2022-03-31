@@ -178,23 +178,11 @@ async function me(req, res) {
     });
 }
 
-async function logout(req, res, next) {
-    let jwtToken = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
-    jwtToken = "";
-
-    return res.status(200).json({
-        code: 200,
-        message: "Sucess to logout",
-        jwtToken,
-    });
-}
-
 module.exports = {
     join,
     login,
     me,
     findEmail,
     changePassword,
-    logout,
     routeQuarter,
 };
