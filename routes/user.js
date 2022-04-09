@@ -9,8 +9,8 @@ const router = express.Router();
 
 router.use(limiter);
 router
-    .route("/:id")
-    .patch(isLogin, isMaster, controllWorker.modifyUser)
-    .delete(isLogin, isMaster, controllWorker.removeUser);
+  .route("/:id")
+  .patch(isLogin, isMaster, controllWorker.modifyUser)
+  .delete(isLogin, isMaster, controllWorker.removeUser);
 
 module.exports = router;

@@ -15,6 +15,5 @@ router.post("/user", controllWorker.changePassword);
 router.post("/join", controllWorker.join);
 router.post("/login", controllWorker.login);
 router.get("/me", isLogin, whoami, controllWorker.me);
-router.get("/logout", isLogin, controllWorker.logout);
 
 module.exports = router;

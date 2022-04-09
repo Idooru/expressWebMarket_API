@@ -9,15 +9,15 @@ const router = express.Router();
 
 router.use(limiter);
 router
-    .route("/")
-    .get(controllWorker.routeQuarter)
-    .get(controllWorker.getProductDetailByName)
-    .get(controllWorker.getProductMain)
-    .post(isLogin, isMaster, controllWorker.createProduct);
+  .route("/")
+  .get(controllWorker.routeQuarter)
+  .get(controllWorker.getProductDetailByName)
+  .get(controllWorker.getProductMain)
+  .post(controllWorker.createProduct);
 router
-    .route("/:id")
-    .get(controllWorker.getProductDetailById)
-    .patch(isLogin, isMaster, controllWorker.modifyProduct)
-    .delete(isLogin, isMaster, controllWorker.removeProduct);
+  .route("/:id")
+  .get(controllWorker.getProductDetailById)
+  .patch(isLogin, isMaster, controllWorker.modifyProduct)
+  .delete(isLogin, isMaster, controllWorker.removeProduct);
 
 module.exports = router;
