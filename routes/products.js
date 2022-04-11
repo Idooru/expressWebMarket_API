@@ -13,7 +13,7 @@ router
   .get(controllWorker.routeQuarter)
   .get(controllWorker.getProductDetailByName)
   .get(controllWorker.getProductMain)
-  .post(controllWorker.createProduct);
+  .post(isLogin, isMaster, controllWorker.createProduct);
 router
   .route("/:id")
   .get(controllWorker.getProductDetailById)

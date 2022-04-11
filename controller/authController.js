@@ -1,57 +1,104 @@
 const dataWorker = require("../data/authData");
-const jwt = require("jsonwebtoken");
 
 async function routeQuarter(req, res, next) {
   const { query } = req;
-  if (query.secret) findEmail(req, res, next);
-  else changePassword(req, res, next);
+  query.secret ? findEmail(req, res, next) : changePassword(req, res, next);
 }
 
 async function join(req, res, next) {
   const { email, nickname, password, repassword } = req.body;
-  let user;
-  let auth;
-  let userId;
 
-  try {
-    const exEmail = await dataWorker.FindEmailToJoin(email);
-    const exNick = await dataWorker.FindNick(nickname);
-    const matchedPass = dataWorker.MatchPasswordToLogin(password, repassword);
-    const hash = await dataWorker.MakeHash(matchedPass);
+  const exEmail = dataWorker.FindEmailToJoin(email);
+  const exNick = dataWorker.FindNick(nickname);
+  const matchedPass = dataWorker.MatchPasswordToLogin(password, repassword);
+  const hash = dataWorker.MakeHash(matchedPass);
+  const promiseStatus = [];
 
-    user = await dataWorker.MakeUser(exEmail, exNick, hash);
-    userId = user.id;
-    auth = await dataWorker.AddAuth(userId);
-  } catch (err) {
-    if (err.message === "Exist Email") {
-      console.error(err);
-      return res.status(401).json({
-        code: 401,
-        message: "Failed to join, The email is exist",
-      });
-    } else if (err.message === "Exist Nickname") {
-      console.error(err);
-      return res.status(401).json({
-        code: 401,
-        message: "Failed to join, The nickname is exist",
-      });
-    } else if (err.message === "Password Inconsistency") {
-      console.error(err);
-      return res.status(401).json({
-        code: 401,
-        message: "Failed to join, The password is not matching",
-      });
+  const valid = await Promise.allSettled([exEmail, exNick, hash]);
+
+  valid.filter((err) => {
+    if (err.status === "rejected") promiseStatus.push(err);
+  });
+
+  if (promiseStatus) {
+    for (let i of promiseStatus) {
+      switch (i.reason.message) {
+        case "Exist Email":
+          console.error(i.reason);
+          return res.status(401).json({
+            code: 401,
+            message: "Failed to join, The email is exist",
+          });
+        case "Exist Nickname":
+          console.error(i.reason);
+          return res.status(401).json({
+            code: 401,
+            message: "Failed to join, The nickname is exist",
+          });
+        case "Password Inconsistency":
+          console.error(i.reason);
+          return res.status(401).json({
+            code: 401,
+            message: "Failed to join, The password is not matching",
+          });
+        default:
+          return next(i.reason);
+      }
     }
-    return next(err);
   }
 
-  result = Object.assign(user.dataValues, auth.dataValues);
+  const user = dataWorker.MakeUser(exEmail, exNick, hash);
+  const userId = user.id;
+  const auth = dataWorker.AddAuth(userId);
+  const checked = await Promise.allSettled([
+    exEmail,
+    exNick,
+    matchedPass,
+    hash,
+    user,
+  ]);
 
-  return res.status(201).json({
-    code: 201,
-    message: "Sucess to join, and do not forget userSecret",
-    result,
-  });
+  // try {
+  //   const exEmail = await dataWorker.FindEmailToJoin(email);
+  //   const exNick = await dataWorker.FindNick(nickname);
+  //   const matchedPass = dataWorker.MatchPasswordToLogin(password, repassword);
+  //   const hash = await dataWorker.MakeHash(matchedPass);
+
+  //   user = await dataWorker.MakeUser(exEmail, exNick, hash);
+  //   userId = user.id;
+  //   auth = await dataWorker.AddAuth(userId);
+  // } catch (err) {
+  //   if (err.message === "Exist Email") {
+  //     console.error(err);
+  //     return res.status(401).json({
+  //       code: 401,
+  //       message: "Failed to join, The email is exist",
+  //     });
+  //   } else if (err.message === "Exist Nickname") {
+  //     console.error(err);
+  //     return res.status(401).json({
+  //       code: 401,
+  //       message: "Failed to join, The nickname is exist",
+  //     });
+  //   } else if (err.message === "Password Inconsistency") {
+  //     console.error(err);
+  //     return res.status(401).json({
+  //       code: 401,
+  //       message: "Failed to join, The password is not matching",
+  //     });
+  //   }
+  //   return next(err);
+  // }
+
+  // result = Object.assign(user.dataValues, auth.dataValues);
+
+  // return res.status(201).json({
+  //   code: 201,
+  //   message: "Sucess to join, and do not forget userSecret",
+  //   result,
+  // });
+
+  res.json({ status: "test" });
 }
 
 async function login(req, res, next) {
@@ -146,7 +193,7 @@ async function changePassword(req, res, next) {
     } else if (err.message === "Password does not match") {
       return res.status(401).json({
         code: 401,
-        message: "This passwords do not match",
+        message: "These passwords do not match",
       });
     }
     console.error(err);

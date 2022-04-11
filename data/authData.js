@@ -4,11 +4,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 function checkToLogin(auth) {
-  if (auth) {
-    return false;
-  } else {
-    return true;
-  }
+  const status = auth ? false : true;
+  return status;
 }
 
 async function FindEmailToJoin(email) {
