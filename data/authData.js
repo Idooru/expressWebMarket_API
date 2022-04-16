@@ -1,5 +1,6 @@
 const User = require("../models/users");
 const Auth = require("../models/auths");
+const errorWorker = require("../errors/authDataErr");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -10,13 +11,11 @@ function checkToLogin(auth) {
 
 async function FindEmailToJoin(email) {
   let exEmail;
-
   try {
     exEmail = await User.findOne({ where: { email }, attributes: ["email"] });
   } catch (err) {
     throw err;
   }
-
   if (exEmail !== null) throw new Error("Exist Email");
   return email;
 }
@@ -123,9 +122,12 @@ async function FindNick(nickname) {
 
 function MatchPasswordToLogin(password, repassword) {
   if (password === repassword) {
-    return password;
+    return {
+      result: "common",
+      password,
+    };
   }
-  throw new Error("Password Inconsistency");
+  return errorWorker.MatchPasswordToModify();
 }
 
 async function MakeHash(password) {

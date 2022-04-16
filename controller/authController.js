@@ -1,104 +1,55 @@
 const dataWorker = require("../data/authData");
-
-async function routeQuarter(req, res, next) {
-  const { query } = req;
-  query.secret ? findEmail(req, res, next) : changePassword(req, res, next);
-}
+const errorWorker = require("../errors/authControllerErr");
 
 async function join(req, res, next) {
-  const { email, nickname, password, repassword } = req.body;
+  const { usedEmail, usedNickname, usedPassword, usedRepassword } = req.body;
 
-  const exEmail = dataWorker.FindEmailToJoin(email);
-  const exNick = dataWorker.FindNick(nickname);
-  const matchedPass = dataWorker.MatchPasswordToLogin(password, repassword);
-  const hash = dataWorker.MakeHash(matchedPass);
-  const promiseStatus = [];
+  const exEmail = dataWorker.FindEmailToJoin(usedEmail);
+  const exNick = dataWorker.FindNick(usedNickname);
 
-  const valid = await Promise.allSettled([exEmail, exNick, hash]);
+  const isPwMatched = dataWorker.MatchPasswordToLogin(
+    usedPassword,
+    usedRepassword
+  );
 
-  valid.filter((err) => {
-    if (err.status === "rejected") promiseStatus.push(err);
-  });
-
-  if (promiseStatus) {
-    for (let i of promiseStatus) {
-      switch (i.reason.message) {
-        case "Exist Email":
-          console.error(i.reason);
-          return res.status(401).json({
-            code: 401,
-            message: "Failed to join, The email is exist",
-          });
-        case "Exist Nickname":
-          console.error(i.reason);
-          return res.status(401).json({
-            code: 401,
-            message: "Failed to join, The nickname is exist",
-          });
-        case "Password Inconsistency":
-          console.error(i.reason);
-          return res.status(401).json({
-            code: 401,
-            message: "Failed to join, The password is not matching",
-          });
-        default:
-          return next(i.reason);
-      }
-    }
+  if (isPwMatched.result === "error") {
+    return res.status(isPwMatched.code).json({
+      code: isPwMatched.code,
+      message: isPwMatched.message,
+    });
   }
 
-  const user = dataWorker.MakeUser(exEmail, exNick, hash);
+  const hash = dataWorker.MakeHash(isPwMatched.password);
+  const rejectedStatus = [];
+
+  const valueArray = await Promise.allSettled([exEmail, exNick, hash]).then(
+    (settle) =>
+      settle.map((res) =>
+        res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
+      )
+  );
+
+  if (rejectedStatus) {
+    const error = errorWorker.join(rejectedStatus, res);
+    return res.status(error.code).json({
+      code: error.code,
+      message: error.message,
+    });
+  }
+
+  const [email, nickname, hashed] = valueArray;
+
+  const user = await dataWorker.MakeUser(email, nickname, hashed);
   const userId = user.id;
-  const auth = dataWorker.AddAuth(userId);
-  const checked = await Promise.allSettled([
-    exEmail,
-    exNick,
-    matchedPass,
-    hash,
-    user,
-  ]);
+  const auth = await dataWorker.AddAuth(userId);
 
-  // try {
-  //   const exEmail = await dataWorker.FindEmailToJoin(email);
-  //   const exNick = await dataWorker.FindNick(nickname);
-  //   const matchedPass = dataWorker.MatchPasswordToLogin(password, repassword);
-  //   const hash = await dataWorker.MakeHash(matchedPass);
+  const createdUser = Object.assign(user.dataValues, auth.dataValues);
 
-  //   user = await dataWorker.MakeUser(exEmail, exNick, hash);
-  //   userId = user.id;
-  //   auth = await dataWorker.AddAuth(userId);
-  // } catch (err) {
-  //   if (err.message === "Exist Email") {
-  //     console.error(err);
-  //     return res.status(401).json({
-  //       code: 401,
-  //       message: "Failed to join, The email is exist",
-  //     });
-  //   } else if (err.message === "Exist Nickname") {
-  //     console.error(err);
-  //     return res.status(401).json({
-  //       code: 401,
-  //       message: "Failed to join, The nickname is exist",
-  //     });
-  //   } else if (err.message === "Password Inconsistency") {
-  //     console.error(err);
-  //     return res.status(401).json({
-  //       code: 401,
-  //       message: "Failed to join, The password is not matching",
-  //     });
-  //   }
-  //   return next(err);
-  // }
-
-  // result = Object.assign(user.dataValues, auth.dataValues);
-
-  // return res.status(201).json({
-  //   code: 201,
-  //   message: "Sucess to join, and do not forget userSecret",
-  //   result,
-  // });
-
-  res.json({ status: "test" });
+  res.status(201).json({
+    code: 201,
+    message: "Sucess to join, and do not forget userSecret",
+    createdUser,
+  });
 }
 
 async function login(req, res, next) {
@@ -231,5 +182,4 @@ module.exports = {
   me,
   findEmail,
   changePassword,
-  routeQuarter,
 };
