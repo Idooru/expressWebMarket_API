@@ -4,13 +4,9 @@ const errorWorker = require("../errors/authDataErr");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-function checkToLogin(auth) {
-  const status = auth ? false : true;
-  return status;
-}
-
 async function FindEmailToJoin(email) {
   let exEmail;
+
   try {
     exEmail = await User.findOne({ where: { email }, attributes: ["email"] });
   } catch (err) {
@@ -18,6 +14,95 @@ async function FindEmailToJoin(email) {
   }
   if (exEmail !== null) throw new Error("Exist Email");
   return email;
+}
+
+async function FindNick(nickname) {
+  let exNick;
+
+  try {
+    exNick = await User.findOne({
+      where: { nickname },
+      attributes: ["nickname"],
+    });
+  } catch (err) {
+    throw err;
+  }
+
+  if (exNick !== null) throw new Error("Exist Nickname");
+  return nickname;
+}
+
+function MatchPasswordToLogin(password, repassword) {
+  return new Promise((resolve, reject) =>
+    password === repassword
+      ? resolve(password)
+      : reject(errorWorker.MatchPasswordToModify())
+  );
+}
+
+function MakeHash(password) {
+  return bcrypt.hashSync(password, 12);
+}
+
+async function MakeUser(exEmail, exNick, hash) {
+  try {
+    return await User.create({
+      id: Date.now().toString(),
+      email: exEmail,
+      password: hash,
+      nickname: exNick,
+    });
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function AddAuth(userId) {
+  let auth;
+  let userEmail;
+  let userSecret = (() => {
+    let result = "";
+    const character =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characterLength = character.length;
+
+    for (let i = 0; i < length; i++) {
+      result += character.charAt(Math.floor(Math.random() * characterLength));
+    }
+
+    return result;
+  })((length = 50));
+
+  try {
+    userEmail = await User.findOne({
+      where: { id: userId },
+      attributes: ["email"],
+    });
+    userEmail = userEmail.email;
+
+    if (userEmail === "shere1765@gmail.com") {
+      auth = await Auth.create({
+        id: userId,
+        userType: "master",
+        userSecret,
+      });
+      return auth;
+    } else {
+      auth = await Auth.create({
+        id: userId,
+        userType: "user",
+        userSecret,
+      });
+      return auth;
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+
+function checkToLogin(auth) {
+  const status = auth ? false : true;
+  return status;
 }
 
 async function FindUserToLogin(email) {
@@ -105,101 +190,6 @@ async function ModifyPassword(newPassword, userId) {
   }
 
   return modifiedPassword;
-}
-
-async function FindNick(nickname) {
-  let exNick;
-
-  try {
-    exNick = await User.findOne({ where: { nickname } });
-  } catch (err) {
-    throw err;
-  }
-
-  if (exNick !== null) throw new Error("Exist Nickname");
-  return nickname;
-}
-
-function MatchPasswordToLogin(password, repassword) {
-  if (password === repassword) {
-    return {
-      result: "common",
-      password,
-    };
-  }
-  return errorWorker.MatchPasswordToModify();
-}
-
-async function MakeHash(password) {
-  let hashed;
-
-  try {
-    hashed = await bcrypt.hash(password, 12);
-  } catch (err) {
-    throw err;
-  }
-
-  return hashed;
-}
-
-async function MakeUser(exEmail, exNick, hash) {
-  let user;
-
-  try {
-    user = await User.create({
-      id: Date.now().toString(),
-      email: exEmail,
-      password: hash,
-      nickname: exNick,
-    });
-  } catch (err) {
-    throw err;
-  }
-
-  return user;
-}
-
-async function AddAuth(userId) {
-  let auth;
-  let userEmail;
-  let userSecret = (() => {
-    let result = "";
-    const character =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const characterLength = character.length;
-
-    for (let i = 0; i < length; i++) {
-      result += character.charAt(Math.floor(Math.random() * characterLength));
-    }
-
-    return result;
-  })((length = 50));
-
-  try {
-    userEmail = await User.findOne({
-      where: { id: userId },
-      attributes: ["email"],
-    });
-    userEmail = userEmail.email;
-
-    if (userEmail === "shere1765@gmail.com") {
-      auth = await Auth.create({
-        id: userId,
-        userType: "master",
-        userSecret,
-      });
-      return auth;
-    } else {
-      auth = await Auth.create({
-        id: userId,
-        userType: "user",
-        userSecret,
-      });
-      return auth;
-    }
-  } catch (err) {
-    throw err;
-  }
 }
 
 async function FindPassword(password, user) {

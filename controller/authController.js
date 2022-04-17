@@ -1,45 +1,44 @@
 const dataWorker = require("../data/authData");
 const errorWorker = require("../errors/authControllerErr");
 
-async function join(req, res, next) {
+async function join(req, res) {
   const { usedEmail, usedNickname, usedPassword, usedRepassword } = req.body;
 
   const exEmail = dataWorker.FindEmailToJoin(usedEmail);
   const exNick = dataWorker.FindNick(usedNickname);
-
   const isPwMatched = dataWorker.MatchPasswordToLogin(
     usedPassword,
     usedRepassword
   );
 
-  if (isPwMatched.result === "error") {
-    return res.status(isPwMatched.code).json({
-      code: isPwMatched.code,
-      message: isPwMatched.message,
-    });
-  }
-
-  const hash = dataWorker.MakeHash(isPwMatched.password);
   const rejectedStatus = [];
 
-  const valueArray = await Promise.allSettled([exEmail, exNick, hash]).then(
-    (settle) =>
-      settle.map((res) =>
-        res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
-      )
+  const valueArray = await Promise.allSettled([
+    exEmail,
+    exNick,
+    isPwMatched,
+  ]).then((settle) =>
+    settle.map((res) =>
+      res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
+    )
   );
 
-  if (rejectedStatus) {
-    const error = errorWorker.join(rejectedStatus, res);
-    return res.status(error.code).json({
-      code: error.code,
-      message: error.message,
-    });
+  if (rejectedStatus.length) {
+    const error = errorWorker.join(rejectedStatus);
+    const result = {};
+
+    for (let i in error.status) {
+      for (let j in error.type) {
+        if (i === j) result[error.type[j]] = error.status[i];
+      }
+    }
+    return res.status(error.status[0].code).json(result);
   }
 
-  const [email, nickname, hashed] = valueArray;
+  const [email, nickname, password] = valueArray;
+  const hash = dataWorker.MakeHash(password);
 
-  const user = await dataWorker.MakeUser(email, nickname, hashed);
+  const user = await dataWorker.MakeUser(email, nickname, hash);
   const userId = user.id;
   const auth = await dataWorker.AddAuth(userId);
 
