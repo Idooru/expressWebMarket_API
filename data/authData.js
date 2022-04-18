@@ -1,42 +1,39 @@
 const User = require("../models/users");
 const Auth = require("../models/auths");
-const errorWorker = require("../errors/authDataErr");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 async function FindEmailToJoin(email) {
-  let exEmail;
-
   try {
-    exEmail = await User.findOne({ where: { email }, attributes: ["email"] });
+    const exEmail = await User.findOne({
+      where: { email },
+      attributes: ["email"],
+    });
+    if (exEmail !== null) throw new Error("Exist Email");
+    return email;
   } catch (err) {
     throw err;
   }
-  if (exEmail !== null) throw new Error("Exist Email");
-  return email;
 }
 
-async function FindNick(nickname) {
-  let exNick;
-
+async function FindNickToJoin(nickname) {
   try {
-    exNick = await User.findOne({
+    const exNick = await User.findOne({
       where: { nickname },
       attributes: ["nickname"],
     });
+    if (exNick !== null) throw new Error("Exist Nickname");
+    return nickname;
   } catch (err) {
     throw err;
   }
-
-  if (exNick !== null) throw new Error("Exist Nickname");
-  return nickname;
 }
 
-function MatchPasswordToLogin(password, repassword) {
+function MatchPassword(password, repassword) {
   return new Promise((resolve, reject) =>
     password === repassword
       ? resolve(password)
-      : reject(errorWorker.MatchPasswordToModify())
+      : reject(new Error("Password Inconsistency"))
   );
 }
 
@@ -58,9 +55,7 @@ async function MakeUser(exEmail, exNick, hash) {
 }
 
 async function AddAuth(userId) {
-  let auth;
-  let userEmail;
-  let userSecret = (() => {
+  const userSecret = (() => {
     let result = "";
     const character =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -74,138 +69,106 @@ async function AddAuth(userId) {
   })((length = 50));
 
   try {
-    userEmail = await User.findOne({
-      where: { id: userId },
+    const user = await User.findOne({
       attributes: ["email"],
+      where: { id: userId },
     });
-    userEmail = userEmail.email;
-
-    if (userEmail === "shere1765@gmail.com") {
-      auth = await Auth.create({
-        id: userId,
-        userType: "master",
-        userSecret,
-      });
-      return auth;
-    } else {
-      auth = await Auth.create({
-        id: userId,
-        userType: "user",
-        userSecret,
-      });
-      return auth;
-    }
+    return user.email === "shere1765@gmail.com"
+      ? await Auth.create({
+          id: userId,
+          userType: "master",
+          userSecret,
+        })
+      : await Auth.create({
+          id: userId,
+          userType: "user",
+          userSecret,
+        });
   } catch (err) {
     throw err;
   }
 }
 
 function checkToLogin(auth) {
-  const status = auth ? false : true;
-  return status;
+  return auth ? false : true;
 }
 
 async function FindUserToLogin(email) {
-  let user;
   try {
-    user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email } });
+    if (user === null) throw new Error("Nonexist Email");
+    return user;
   } catch (err) {
     throw err;
   }
-
-  if (user === null) throw new Error("Nonexist Email");
-  return user;
 }
 
-async function FindId(querySecret) {
-  let exId;
+async function MatchPasswordToLogin(email, password) {
   try {
-    exId = await Auth.findOne({
-      where: { userSecret: querySecret },
+    const user = await User.findOne({
+      where: { email },
+    });
+    const exPassword = await bcrypt.compare(password, user.password);
+
+    if (exPassword === false) throw new Error("Invalid Password");
+    return exPassword;
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function FindEmailToGet(userSecret) {
+  try {
+    const user = await Auth.findOne({
+      where: { userSecret },
       attributes: ["id"],
     });
-  } catch (err) {
-    throw err;
-  }
-  exId = exId.id;
-
-  if (exId === null) throw new Error("Nonexist Id");
-  return exId;
-}
-
-async function FindEmailToGet(id) {
-  let exEmail;
-  try {
-    exEmail = await User.findOne({
-      where: { id },
+    if (user === null) throw new Error("Nonexist Id");
+    const result = await User.findOne({
+      where: { id: user.id },
       attributes: ["email"],
     });
+    return result.email;
   } catch (err) {
     throw err;
   }
-  exEmail = exEmail.email;
-
-  return exEmail;
 }
 
-async function FindUserToCheck(email) {
-  let user;
-
+async function FindPasswordWithEmail(email) {
   try {
-    user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: { email },
+      attributes: ["password"],
+    });
+    if (user === null) throw new Error("Nonexist Email");
+    return user.password;
   } catch (err) {
     throw err;
   }
-
-  if (user === null) throw new Error("Nonexist User");
-  return user;
 }
 
-async function MatchPasswordToModify(inputedPassword, currentPassword) {
-  let isPasswordCorrect;
-
+async function DisableHashing(exPassword, hashedPassword) {
   try {
-    isPasswordCorrect = await bcrypt.compare(inputedPassword, currentPassword);
+    const isCorrect = await bcrypt.compare(exPassword, hashedPassword);
+    if (!isCorrect) throw new Error("Invalid password");
   } catch (err) {
     throw err;
   }
-
-  if (isPasswordCorrect === false) throw new Error("Password does not match");
 }
 
-async function ModifyPassword(newPassword, userId) {
-  let modifiedPassword;
-
+async function ModifyPassword(newPassword, email) {
   try {
-    modifiedPassword = await User.update(
+    await User.update(
       {
         password: newPassword,
       },
       {
-        where: { id: userId },
+        where: { email },
       }
     );
   } catch (err) {
     throw err;
   }
-
-  return modifiedPassword;
-}
-
-async function FindPassword(password, user) {
-  let exPassword;
-
-  try {
-    exPassword = await bcrypt.compare(password, user.password);
-
-    if (exPassword === false) {
-      throw new Error("Invalid Password");
-    }
-  } catch (err) {
-    throw err;
-  }
-
-  return exPassword;
 }
 
 function createJwtToken(user) {
@@ -216,19 +179,18 @@ function createJwtToken(user) {
 }
 
 module.exports = {
-  checkToLogin,
   FindEmailToJoin,
-  FindEmailToGet,
-  FindUserToLogin,
-  FindUserToCheck,
-  MatchPasswordToModify,
-  ModifyPassword,
-  FindId,
-  FindNick,
-  FindPassword,
+  FindNickToJoin,
+  MatchPassword,
   MakeHash,
   MakeUser,
   AddAuth,
+  checkToLogin,
+  FindUserToLogin,
   MatchPasswordToLogin,
+  FindEmailToGet,
+  FindPasswordWithEmail,
+  DisableHashing,
+  ModifyPassword,
   createJwtToken,
 };

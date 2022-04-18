@@ -2,17 +2,17 @@ const dataWorker = require("../data/authData");
 const errorWorker = require("../errors/authControllerErr");
 
 async function join(req, res) {
-  const { usedEmail, usedNickname, usedPassword, usedRepassword } = req.body;
+  const { usedEmail, usedNickname, usedPassword, usedReEnterPassword } =
+    req.body;
 
   const exEmail = dataWorker.FindEmailToJoin(usedEmail);
-  const exNick = dataWorker.FindNick(usedNickname);
-  const isPwMatched = dataWorker.MatchPasswordToLogin(
+  const exNick = dataWorker.FindNickToJoin(usedNickname);
+  const isPwMatched = dataWorker.MatchPassword(
     usedPassword,
-    usedRepassword
+    usedReEnterPassword
   );
 
   const rejectedStatus = [];
-
   const valueArray = await Promise.allSettled([
     exEmail,
     exNick,
@@ -37,14 +37,12 @@ async function join(req, res) {
 
   const [email, nickname, password] = valueArray;
   const hash = dataWorker.MakeHash(password);
-
   const user = await dataWorker.MakeUser(email, nickname, hash);
   const userId = user.id;
   const auth = await dataWorker.AddAuth(userId);
-
   const createdUser = Object.assign(user.dataValues, auth.dataValues);
 
-  res.status(201).json({
+  return res.status(201).json({
     code: 201,
     message: "Sucess to join, and do not forget userSecret",
     createdUser,
@@ -56,11 +54,9 @@ async function login(req, res, next) {
   const auth = req.get("authorization");
   const check = dataWorker.checkToLogin(auth);
   if (check) {
-    let user;
-
     try {
-      user = await dataWorker.FindUserToLogin(email);
-      await dataWorker.FindPassword(password, user);
+      const user = await dataWorker.FindUserToLogin(email);
+      await dataWorker.MatchPasswordToLogin(password, user);
     } catch (err) {
       if (err.message === "Nonexist Email") {
         console.error(err);
@@ -79,7 +75,6 @@ async function login(req, res, next) {
     }
     const token = dataWorker.createJwtToken(user);
     const result = {};
-
     result.user = user.dataValues;
     result.token = token;
     return res.status(200).json({
@@ -96,83 +91,101 @@ async function login(req, res, next) {
 }
 
 async function findEmail(req, res, next) {
-  const querySecret = req.query.secret;
-  let id;
-  let result;
+  const userSecret = req.query.secret;
 
   try {
-    id = await dataWorker.FindId(querySecret);
-    result = await dataWorker.FindEmailToGet(id);
+    const email = await dataWorker.FindEmailToGet(userSecret);
+    return res.status(200).json({
+      code: 200,
+      message: "Sucess to check email with user's id",
+      email,
+    });
   } catch (err) {
     if (err.message === "Nonexist Id") {
       return res.status(401).json({
         code: 401,
         message: "Failed to find email with user's id",
+        userSecret,
       });
     }
     console.error(err);
     return next(err);
   }
-
-  return res.status(200).json({
-    code: 200,
-    message: "Sucess to check email with user's id",
-    result,
-  });
 }
 
-async function changePassword(req, res, next) {
-  const { inputedPassword, newPassword } = req.body;
+async function changePassword(req, res) {
+  const { exPassword, altPassword, reEnterPassword } = req.body;
   const { email } = req.query;
-  let hashed;
 
-  try {
-    const user = await dataWorker.FindUserToCheck(email);
-    const currentPassword = user.password;
-    const userId = user.dataValues.id;
+  const hashedPwPromised = dataWorker.FindPasswordWithEmail(email);
+  const isPwMatchedPromised = dataWorker.MatchPassword(
+    altPassword,
+    reEnterPassword
+  );
 
-    await dataWorker.MatchPasswordToModify(inputedPassword, currentPassword);
-    hashed = await dataWorker.MakeHash(newPassword);
-    await dataWorker.ModifyPassword(hashed, userId);
-  } catch (err) {
-    if (err.message === "Nonexist User") {
-      return res.status(401).json({
-        code: 401,
-        message: "Failed to find, The user is nonexist",
-      });
-    } else if (err.message === "Password does not match") {
-      return res.status(401).json({
-        code: 401,
-        message: "These passwords do not match",
-      });
+  const rejectedStatus = [];
+  const valueArray = await Promise.allSettled([
+    hashedPwPromised,
+    isPwMatchedPromised,
+  ]).then((settle) =>
+    settle.map((res) =>
+      res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
+    )
+  );
+
+  if (rejectedStatus.length) {
+    const error = errorWorker.changePassword(rejectedStatus);
+    const result = {};
+
+    for (let i in error.status) {
+      for (let j in error.type) {
+        if (i === j) result[error.type[j]] = error.status[i];
+      }
     }
-    console.error(err);
-    return next(err);
+
+    return res.status(error.status[0].code).json(result);
   }
 
-  res.status(200).json({
+  const [hashedPassword, newPassword] = valueArray;
+
+  try {
+    await dataWorker.DisableHashing(exPassword, hashedPassword);
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({
+      code: 401,
+      message:
+        "Failed to change for password, The password you entered is not your password",
+    });
+  }
+
+  const hashed = dataWorker.MakeHash(newPassword);
+  await dataWorker.ModifyPassword(hashed, email);
+  return res.status(200).json({
     code: 200,
-    message: "Sucess to modify password",
+    message: "Sucess to change for password",
   });
 }
 
 async function me(req, res) {
   const nickname = req.decoded.user.nickname;
   const authority = req.authority;
-  if (req.authority === "master") {
-    return res.status(200).json({
-      code: 200,
-      message: "The token is valid, welcome master",
-      nickname,
-      authority,
-    });
-  }
-  return res.status(200).json({
-    code: 200,
-    message: "The tokein is valid",
-    nickname,
-    authority,
-  });
+  const result =
+    req.authority === "master"
+      ? {
+          code: 200,
+          message: "The token is valid, welcome master",
+          nickname,
+          authority,
+        }
+      : {
+          code: 200,
+          message: "The token is valid",
+          nickname,
+          authority,
+        };
+
+  return res.status(200).json({ result });
 }
 
 module.exports = {

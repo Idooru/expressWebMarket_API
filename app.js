@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const favicon = require("serve-favicon");
 const session = require("express-session");
+const passport = require("passport");
+const passportConfig = require("./passport");
 
 const { sequelize } = require("./models");
 
@@ -17,7 +19,7 @@ app.set("port", process.env.PORT || 5147);
 (async () => {
   try {
     await sequelize.sync({ force: false });
-    console.log("SQL 연결 성공!");
+    console.log("Sucess to connect for SQL!");
   } catch (err) {
     console.error(err);
   }
@@ -41,6 +43,8 @@ app.use(
     name: "session-cookie",
   })
 );
+app.use(passport.initialize());
+passportConfig();
 
 const productRouter = require("./routes/products");
 const authRouter = require("./routes/auth");
@@ -57,11 +61,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const message = err.message;
-
   res.status(500).json({
     code: 500,
-    message,
+    message: err.message,
+    status: err.status,
   });
 });
 

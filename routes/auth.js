@@ -16,8 +16,8 @@ router.use("/user", (req, res, next) => {
     : controllWorker.changePassword(req, res, next);
 });
 
-router.get("/user", controllWorker.findEmail);
-router.post("/user", controllWorker.changePassword);
+router.get("/user/findEmail", controllWorker.findEmail);
+router.post("/user/changePassword", controllWorker.changePassword);
 router.post("/join", controllWorker.join);
 router.post("/login", controllWorker.login);
 router.get("/me", isLogin, whoami, controllWorker.me);
