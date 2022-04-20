@@ -16,16 +16,12 @@ const app = express();
 
 app.set("port", process.env.PORT || 5147);
 
-// (async () => {
-//   try {
-//     await sequelize.sync({ force: false });
-//     console.log("Sucess to connect for SQL!");
-//   } catch (err) {
-//     console.error(err);
-//   }
-// })();
-
-sequelize.sync({ force: false });
+sequelize
+  .sync({ force: false })
+  .then(() => {
+    console.log("Sucess to connect for SQL!");
+  })
+  .catch((err) => console.error(err));
 
 app.use(morgan("dev"));
 app.use(cors());
@@ -45,6 +41,7 @@ app.use(
     name: "session-cookie",
   })
 );
+
 app.use(passport.initialize());
 passportConfig();
 
