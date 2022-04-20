@@ -24,7 +24,7 @@ async function join(req, res) {
   );
 
   if (rejectedStatus.length) {
-    const error = errorWorker.join(rejectedStatus);
+    const error = errorWorker.promiseOnJoin(rejectedStatus);
     const result = {};
 
     for (let i in error.status) {
@@ -101,13 +101,7 @@ async function findEmail(req, res, next) {
       email,
     });
   } catch (err) {
-    return err.message === "Nonexist Id"
-      ? res.status(401).json({
-          code: 401,
-          message: "Failed to find email with user's id",
-          userSecret,
-        })
-      : next(err);
+    errorWorker.FindEmailToGet(err, res, next);
   }
 }
 
@@ -132,7 +126,7 @@ async function changePassword(req, res) {
   );
 
   if (rejectedStatus.length) {
-    const error = errorWorker.changePassword(rejectedStatus);
+    const error = errorWorker.promiseOnChangePassword(rejectedStatus);
     const result = {};
 
     for (let i in error.status) {
@@ -149,16 +143,12 @@ async function changePassword(req, res) {
   try {
     await dataWorker.DisableHashing(exPassword, hashedPassword);
   } catch (err) {
-    console.error(err);
-    return res.status(401).json({
-      code: 401,
-      message:
-        "Failed to change for password, The password you entered is not your password",
-    });
+    errorWorker.DisableHashing(err, res, next);
   }
 
   const hashed = dataWorker.MakeHash(newPassword);
   await dataWorker.ModifyPassword(hashed, email);
+
   return res.status(200).json({
     code: 200,
     message: "Sucess to change for password",

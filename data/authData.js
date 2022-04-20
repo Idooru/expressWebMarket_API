@@ -1,4 +1,3 @@
-const Sequelize = require("../models/index");
 const User = require("../models/users");
 const Auth = require("../models/auths");
 const bcrypt = require("bcrypt");
@@ -97,7 +96,7 @@ function checkToLogin(auth) {
 async function FindUserToLogin(email) {
   try {
     const user = await User.findOne({ where: { email } });
-    if (user === null) throw new Error("Nonexist Email");
+    if (!user) throw new Error("Nonexist Email");
     return user;
   } catch (err) {
     throw err;

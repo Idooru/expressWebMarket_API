@@ -1,4 +1,4 @@
-exports.join = (errs) => {
+exports.promiseOnJoin = (errs) => {
   const errStatus = [];
   const errType = [];
 
@@ -10,7 +10,7 @@ exports.join = (errs) => {
           code: 401,
           message: "Failed to join, The email is exist",
         });
-        errType.push("Email");
+        errType.push("Email_ERROR");
         break;
 
       case "Exist Nickname":
@@ -19,7 +19,7 @@ exports.join = (errs) => {
           code: 401,
           message: "Failed to join, The nickname is exist",
         });
-        errType.push("Nickname");
+        errType.push("Nickname_ERROR");
         break;
 
       case "Password Inconsistency":
@@ -28,20 +28,31 @@ exports.join = (errs) => {
           code: 401,
           message: "Failed to join, These passwords do not match each other",
         });
-        errType.push("Password");
+        errType.push("Password_ERROR");
         break;
 
       default:
         console.error(err);
         errStatus.push({ code: 500, message: err.message });
-        errType.push("ServerError");
+        errType.push("Server_Error");
         break;
     }
   }
   return { status: [...errStatus], type: [...errType] };
 };
 
-exports.changePassword = (errs) => {
+exports.FindEmailToGet = (err, res, next) => {
+  console.error(err);
+  return err.message === "Nonexist Id"
+    ? res.status(401).json({
+        code: 401,
+        message: "Failed to find email with user's id",
+        userSecret,
+      })
+    : next(err);
+};
+
+exports.promiseOnChangePassword = (errs) => {
   const errStatus = [];
   const errType = [];
 
@@ -53,7 +64,7 @@ exports.changePassword = (errs) => {
           code: 401,
           message: "Failed to change for password, The email is nonexist",
         });
-        errType.push("Email");
+        errType.push("Email_ERROR");
         break;
 
       case "Password Inconsistency":
@@ -62,16 +73,25 @@ exports.changePassword = (errs) => {
           code: 401,
           message: "Failed to join, These passwords do not match each other",
         });
-        errType.push("Password");
+        errType.push("Password_ERROR");
         break;
 
       default:
         console.error(err);
         errStatus.push({ code: 500, message: err.message });
-        errType.push("ServerError");
+        errType.push("Server_Error");
         break;
     }
   }
 
   return { status: [...errStatus], type: [...errType] };
+};
+
+exports.DisableHashing = (err, res, next) => {
+  console.error(err);
+  return res.status(401).json({
+    code: 401,
+    message:
+      "Failed to change for password, The password you entered is not your password",
+  });
 };

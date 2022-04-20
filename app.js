@@ -16,14 +16,16 @@ const app = express();
 
 app.set("port", process.env.PORT || 5147);
 
-(async () => {
-  try {
-    await sequelize.sync({ force: false });
-    console.log("Sucess to connect for SQL!");
-  } catch (err) {
-    console.error(err);
-  }
-})();
+// (async () => {
+//   try {
+//     await sequelize.sync({ force: false });
+//     console.log("Sucess to connect for SQL!");
+//   } catch (err) {
+//     console.error(err);
+//   }
+// })();
+
+sequelize.sync({ force: false });
 
 app.use(morgan("dev"));
 app.use(cors());
@@ -62,8 +64,10 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   return res.status(500).json({
-    code: 500,
-    error: err.message,
+    Error: {
+      code: 500,
+      error: err.message,
+    },
   });
 });
 

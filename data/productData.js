@@ -11,9 +11,9 @@ async function productFindOne(data) {
             where: { name: data },
           });
 
-    if (product === null) {
+    if (!product) {
       const error = new Error("No Product");
-      error.id = data;
+      error.data = data;
       throw error;
     }
 
@@ -24,32 +24,15 @@ async function productFindOne(data) {
 }
 
 async function productFindAll() {
-  let products;
-
   try {
-    products = await Product.findAll();
+    const products = await Product.findAll({});
+    if (!products.length) {
+      throw new Error("No Product");
+    }
+    return products;
   } catch (err) {
     throw err;
   }
-
-  if (products.length === 0) throw new Error("no Product");
-
-  return products;
-}
-
-async function GetResult(paramsId) {
-  let AfterProducts;
-
-  try {
-    AfterProducts = await Product.findOne({
-      where: { id: paramsId },
-    });
-  } catch (err) {
-    throw err;
-  }
-
-  AfterProducts = AfterProducts === null ? "removed" : AfterProducts.dataValues;
-  return AfterProducts;
 }
 
 async function Create(package) {
@@ -71,25 +54,11 @@ async function Create(package) {
 
 async function Update(package, paramsId) {
   try {
-    const { name, price, origin, type } = package;
-    await Product.update(
-      {
-        name,
-        price,
-        origin,
-        type,
-      },
-      {
-        where: { id: paramsId },
-      }
-    );
+    await Product.update(package, {
+      where: { id: paramsId },
+    });
   } catch (err) {
-    let errMessage = err.message;
-    if (errMessage === "Validation error") {
-      throw new Error("same Product");
-    } else if (errMessage.startsWith("notNull Violation")) {
-      throw new Error("form Null");
-    } else throw err;
+    throw err.message === "Validation error" ? new Error("Same Product") : err;
   }
 }
 
@@ -103,11 +72,30 @@ async function Destroy(paramsId) {
   }
 }
 
+async function GetResult(paramsId, purpose) {
+  try {
+    const product = await Product.findOne({
+      where: { id: paramsId },
+    });
+
+    if (!product) {
+      const error = new Error("No Product");
+      error.id = paramsId;
+      error.purpose = purpose === "Update" ? "Update" : "Delete";
+      throw error;
+    }
+
+    return product;
+  } catch (err) {
+    throw err;
+  }
+}
+
 module.exports = {
   productFindOne,
   productFindAll,
-  GetResult,
   Create,
   Update,
   Destroy,
+  GetResult,
 };
