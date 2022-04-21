@@ -6,6 +6,7 @@ const cors = require("cors");
 const favicon = require("serve-favicon");
 const session = require("express-session");
 const passport = require("passport");
+const JwtStrategy = require("passport-jwt").Strategy;
 const passportConfig = require("./passport");
 
 const { sequelize } = require("./models");
@@ -43,7 +44,8 @@ app.use(
 );
 
 app.use(passport.initialize());
-passportConfig();
+app.use(passport.session());
+// passportConfig();
 
 const productRouter = require("./routes/products");
 const authRouter = require("./routes/auth");

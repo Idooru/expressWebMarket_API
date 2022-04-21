@@ -9,6 +9,19 @@ const router = express.Router();
 
 router.use(limiter);
 
+// router.use("/", (req, res, next) => {
+//   const { query } = req;
+//   query.secret
+//     ? controllWorker.findEmail(req, res, next)
+//     : controllWorker.changePassword(req, res, next);
+// });
+
+router.get("/findEmail", controllWorker.findEmail);
+router.post("/join", controllWorker.join);
+router.post("/changePassword", controllWorker.changePassword);
+router.patch("/modifyUser", controllWorker.modifyUser);
+router.delete("/delete", controllWorker.removeUser);
+
 router
   .route("/:id")
   .patch(controllWorker.modifyUser)
