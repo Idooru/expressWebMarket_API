@@ -49,6 +49,7 @@ async function getProductMain(req, res, next) {
 
 async function createProduct(req, res, next) {
   const package = req.body;
+  package.id = Date.now().toString();
 
   try {
     const result = await dataWorker.Create(package);
@@ -58,7 +59,7 @@ async function createProduct(req, res, next) {
       result,
     });
   } catch (err) {
-    errorWorker.operateProduct(err, res, next);
+    errorWorker.createProduct(err, res, next);
   }
 }
 
@@ -78,7 +79,7 @@ async function modifyProduct(req, res, next) {
   } catch (err) {
     err.message === "No Product"
       ? errorWorker.getResult(err, res, next)
-      : errorWorker.operateProduct(err, res, next);
+      : errorWorker.updateProduct(err, res, next);
   }
 }
 

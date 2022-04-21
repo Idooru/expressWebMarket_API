@@ -1,50 +1,39 @@
 const User = require("../models/users");
-const bcrypt = require("bcrypt");
 
-async function Update(package, paramsId) {
+async function Update(package, userId) {
   try {
-    const { email, password, nickname } = package;
-    const hash = await bcrypt.hash(password, 12);
-    await User.update(
-      {
-        email,
-        password: hash,
-        nickname,
-      },
-      {
-        where: { id: paramsId },
-      }
-    );
+    await User.update(package, {
+      where: { id: userId },
+    });
   } catch (err) {
-    let errMessage = err.message;
-    if (errMessage === "Validation error") {
-      throw new Error("same User");
-    } else if (errMessage.startsWith("notNull Violation")) {
-      throw new Error("form Null");
-    } else throw err;
+    throw err.message === "Validation error" ? new Error("Same User") : err;
   }
 }
 
-async function GetResult(paramsId) {
-  let AfterUser;
-
+async function Destroy(userId) {
   try {
-    AfterUser = await User.findOne({
-      where: { id: paramsId },
+    await User.destroy({
+      where: { id: userId },
     });
   } catch (err) {
     throw err;
   }
-
-  AfterUser = AfterUser === null ? "removed" : AfterUser.dataValues;
-  return AfterUser;
 }
 
-async function Destroy(paramsId) {
+async function GetResult(userId, purpose) {
   try {
-    await User.destroy({
-      where: { id: paramsId },
+    const user = await User.findOne({
+      where: { id: userId },
     });
+
+    if (!user) {
+      const error = new Error("No User");
+      error.id = userId;
+      error.purpose = purpose === "Update" ? "Update" : "Delete";
+      throw error;
+    }
+
+    return user;
   } catch (err) {
     throw err;
   }

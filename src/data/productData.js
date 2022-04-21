@@ -36,51 +36,43 @@ async function productFindAll() {
 }
 
 async function Create(package) {
-  const { name, price, origin, type } = package;
-
   try {
-    const createdProduct = await Product.create({
-      id: Date.now().toString(),
-      name,
-      price,
-      origin,
-      type,
-    });
+    const createdProduct = await Product.create(package);
     return createdProduct;
   } catch (err) {
     throw err.message === "Validation error" ? new Error("Same Product") : err;
   }
 }
 
-async function Update(package, paramsId) {
+async function Update(package, productId) {
   try {
     await Product.update(package, {
-      where: { id: paramsId },
+      where: { id: productId },
     });
   } catch (err) {
     throw err.message === "Validation error" ? new Error("Same Product") : err;
   }
 }
 
-async function Destroy(paramsId) {
+async function Destroy(productId) {
   try {
     await Product.destroy({
-      where: { id: paramsId },
+      where: { id: productId },
     });
   } catch (err) {
     throw err;
   }
 }
 
-async function GetResult(paramsId, purpose) {
+async function GetResult(productId, purpose) {
   try {
     const product = await Product.findOne({
-      where: { id: paramsId },
+      where: { id: productId },
     });
 
     if (!product) {
       const error = new Error("No Product");
-      error.id = paramsId;
+      error.id = productId;
       error.purpose = purpose === "Update" ? "Update" : "Delete";
       throw error;
     }

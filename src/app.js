@@ -60,9 +60,9 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  return res.status(500).json({
+  return res.status(err.status).json({
     Error: {
-      code: 500,
+      code: err.status,
       error: err.message,
     },
   });

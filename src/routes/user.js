@@ -8,9 +8,10 @@ const limiter = require("../middlewares/limiter");
 const router = express.Router();
 
 router.use(limiter);
+
 router
   .route("/:id")
-  .patch(isLogin, isMaster, controllWorker.modifyUser)
-  .delete(isLogin, isMaster, controllWorker.removeUser);
+  .patch(controllWorker.modifyUser)
+  .delete(controllWorker.removeUser);
 
 module.exports = router;
