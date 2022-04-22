@@ -66,23 +66,18 @@ async function findEmail(req, res, next) {
 }
 
 async function changePassword(req, res, next) {
-  const { exPassword, altPassword, reEnterPassword } = req.body;
+  const { altPassword, reEnterPassword } = req.body;
   const { email } = req.query;
 
-  const hashedPwPromised = dataWorker.FindPasswordWithEmail(email);
-  const isPwMatchedPromised = dataWorker.MatchPassword(
-    altPassword,
-    reEnterPassword
-  );
+  const exUser = dataWorker.FindEmailToUser(email);
+  const isPwMatched = dataWorker.MatchPassword(altPassword, reEnterPassword);
 
   const rejectedStatus = [];
-  const valueArray = await Promise.allSettled([
-    hashedPwPromised,
-    isPwMatchedPromised,
-  ]).then((settle) =>
-    settle.map((res) =>
-      res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
-    )
+  const valueArray = await Promise.allSettled([exUser, isPwMatched]).then(
+    (settle) =>
+      settle.map((res) =>
+        res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
+      )
   );
 
   if (rejectedStatus.length) {
@@ -98,16 +93,10 @@ async function changePassword(req, res, next) {
     return res.status(error.status[0].code).json(result);
   }
 
-  const [hashedPassword, newPassword] = valueArray;
-
-  try {
-    await dataWorker.DisableHashing(exPassword, hashedPassword);
-  } catch (err) {
-    errorWorker.DisableHashing(err, res, next);
-  }
+  const [user, newPassword] = valueArray;
 
   const hashed = dataWorker.MakeHash(newPassword);
-  await dataWorker.ModifyPassword(hashed, email);
+  await dataWorker.ModifyPassword(hashed, user.email);
 
   return res.status(200).json({
     code: 200,

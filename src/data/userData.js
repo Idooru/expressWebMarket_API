@@ -109,14 +109,13 @@ async function FindEmailToGet(userSecret) {
   }
 }
 
-async function FindPasswordWithEmail(email) {
+async function FindEmailToUser(email) {
   try {
     const user = await User.findOne({
       where: { email },
-      attributes: ["password"],
     });
     if (!user) throw new Error("Nonexist Email");
-    return user.password;
+    return user;
   } catch (err) {
     throw err;
   }
@@ -193,7 +192,7 @@ module.exports = {
   MakeUser,
   AddAuth,
   FindEmailToGet,
-  FindPasswordWithEmail,
+  FindEmailToUser,
   DisableHashing,
   ModifyPassword,
   Update,

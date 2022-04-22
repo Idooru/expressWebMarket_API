@@ -6,17 +6,14 @@ const cors = require("cors");
 const favicon = require("serve-favicon");
 const session = require("express-session");
 const passport = require("passport");
-const JwtStrategy = require("passport-jwt").Strategy;
 const passportConfig = require("./passport");
 
 const { sequelize } = require("./models");
 
 dotenv.config();
-
 const app = express();
 
 app.set("port", process.env.PORT || 5147);
-
 sequelize
   .sync({ force: false })
   .then(() => {
@@ -26,26 +23,11 @@ sequelize
 
 app.use(morgan("dev"));
 app.use(cors());
-app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(
-  session({
-    resave: false,
-    saveUninitialized: false,
-    secret: process.env.COOKIE_SECRET,
-    cookie: {
-      httpOnly: true,
-      secure: false,
-    },
-
-    name: "session-cookie",
-  })
-);
 
 app.use(passport.initialize());
-app.use(passport.session());
-// passportConfig();
+passportConfig();
 
 const productRouter = require("./routes/products");
 const authRouter = require("./routes/auth");
