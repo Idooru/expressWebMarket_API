@@ -1,6 +1,6 @@
-const Sequelize = require("sequelize");
+import Sequelize from "sequelize";
 
-module.exports = class Auth extends Sequelize.Model {
+export class Auth extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
@@ -32,4 +32,4 @@ module.exports = class Auth extends Sequelize.Model {
   static associate(db) {
     db.Auth.belongsTo(db.User, { sourceKey: "id" });
   }
-};
+}

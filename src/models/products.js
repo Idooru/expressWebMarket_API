@@ -1,6 +1,6 @@
-const Sequelize = require("sequelize");
+import Sequelize from "sequelize";
 
-module.exports = class Product extends Sequelize.Model {
+export class Product extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
@@ -41,4 +41,4 @@ module.exports = class Product extends Sequelize.Model {
       }
     );
   }
-};
+}

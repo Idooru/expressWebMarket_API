@@ -1,6 +1,6 @@
-const Limiter = require("express-rate-limit");
+import Limiter from "express-rate-limit";
 
-module.exports = new Limiter({
+export default new Limiter({
   windowMs: 1 * 60 * 1000,
   max: 5,
   hendler(req, res) {

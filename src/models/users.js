@@ -1,6 +1,6 @@
-const Sequelize = require("sequelize");
+import Sequelize from "sequelize";
 
-module.exports = class User extends Sequelize.Model {
+export class User extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
@@ -41,4 +41,4 @@ module.exports = class User extends Sequelize.Model {
   static associate(db) {
     db.User.hasOne(db.Auth, { sourceKey: "id" });
   }
-};
+}

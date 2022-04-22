@@ -1,6 +1,6 @@
-const Product = require("../models/products");
+import { Product } from "../models/products.js";
 
-async function productFindOne(data) {
+export async function productFindOne(data) {
   try {
     const product =
       typeof data === "number"
@@ -23,7 +23,7 @@ async function productFindOne(data) {
   }
 }
 
-async function productFindAll() {
+export async function productFindAll() {
   try {
     const products = await Product.findAll({});
     if (!products.length) {
@@ -35,18 +35,18 @@ async function productFindAll() {
   }
 }
 
-async function Create(package) {
+export async function Create(payload) {
   try {
-    const createdProduct = await Product.create(package);
+    const createdProduct = await Product.create(payload);
     return createdProduct;
   } catch (err) {
     throw err.message === "Validation error" ? new Error("Same Product") : err;
   }
 }
 
-async function Update(package, productId) {
+export async function Update(payload, productId) {
   try {
-    await Product.update(package, {
+    await Product.update(payload, {
       where: { id: productId },
     });
   } catch (err) {
@@ -54,7 +54,7 @@ async function Update(package, productId) {
   }
 }
 
-async function Destroy(productId) {
+export async function Destroy(productId) {
   try {
     await Product.destroy({
       where: { id: productId },
@@ -64,7 +64,7 @@ async function Destroy(productId) {
   }
 }
 
-async function GetResult(productId, purpose) {
+export async function GetResult(productId, purpose) {
   try {
     const product = await Product.findOne({
       where: { id: productId },
@@ -82,12 +82,3 @@ async function GetResult(productId, purpose) {
     throw err;
   }
 }
-
-module.exports = {
-  productFindOne,
-  productFindAll,
-  Create,
-  Update,
-  Destroy,
-  GetResult,
-};

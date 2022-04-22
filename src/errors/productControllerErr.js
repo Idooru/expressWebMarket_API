@@ -1,4 +1,4 @@
-exports.getProductDetail = (err, res, next) => {
+export function getProductDetail(err, res, next) {
   console.error(err);
   return err.message === "No Product"
     ? res.status(404).json({
@@ -8,9 +8,9 @@ exports.getProductDetail = (err, res, next) => {
         },
       })
     : next(err);
-};
+}
 
-exports.productFindAll = (err, res, next) => {
+export function productFindAll(err, res, next) {
   console.error(err);
   return err.message === "No Product"
     ? res.status(500).json({
@@ -20,9 +20,9 @@ exports.productFindAll = (err, res, next) => {
         },
       })
     : next(err);
-};
+}
 
-exports.createProduct = (err, res, next) => {
+export function createProduct(err, res, next) {
   console.error(err);
   return err.message === "Same Product"
     ? res.status(401).json({
@@ -32,9 +32,9 @@ exports.createProduct = (err, res, next) => {
         },
       })
     : next(err);
-};
+}
 
-exports.updateProduct = (err, res, next) => {
+export function updateProduct(err, res, next) {
   console.error(err);
   return err.message === "Same Product"
     ? res.status(401).json({
@@ -44,9 +44,9 @@ exports.updateProduct = (err, res, next) => {
         },
       })
     : next(err);
-};
+}
 
-exports.getResult = (err, res, next) => {
+export function getResult(err, res, next) {
   const purpose = err.purpose;
   console.error(err);
   return err.message === "No Product"
@@ -57,4 +57,4 @@ exports.getResult = (err, res, next) => {
         },
       })
     : next(err);
-};
+}

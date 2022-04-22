@@ -1,4 +1,4 @@
-exports.promiseOnJoin = (errs) => {
+export function promiseOnJoin(errs) {
   const errStatus = [];
   const errType = [];
 
@@ -39,9 +39,9 @@ exports.promiseOnJoin = (errs) => {
     }
   }
   return { status: [...errStatus], type: [...errType] };
-};
+}
 
-exports.FindEmailToGet = (err, res, next) => {
+export function FindEmailToGet(err, res, next) {
   console.error(err);
   return err.message === "Nonexist Id"
     ? res.status(401).json({
@@ -52,9 +52,9 @@ exports.FindEmailToGet = (err, res, next) => {
         },
       })
     : next(err);
-};
+}
 
-exports.promiseOnChangePassword = (errs) => {
+export function promiseOnChangePassword(errs) {
   const errStatus = [];
   const errType = [];
 
@@ -87,9 +87,9 @@ exports.promiseOnChangePassword = (errs) => {
   }
 
   return { status: [...errStatus], type: [...errType] };
-};
+}
 
-exports.DisableHashing = (err, res, next) => {
+export function DisableHashing(err, res, next) {
   console.error(err);
   return res.status(401).json({
     Email_ERROR: {
@@ -98,9 +98,9 @@ exports.DisableHashing = (err, res, next) => {
         "Failed to change for password, The password you entered is not your password",
     },
   });
-};
+}
 
-exports.updateUser = (err, res, next) => {
+export function updateUser(err, res, next) {
   console.error(err);
   return err.message === "Same User"
     ? res.status(401).json({
@@ -110,9 +110,9 @@ exports.updateUser = (err, res, next) => {
         },
       })
     : next(err);
-};
+}
 
-exports.getResult = (err, res, next) => {
+export function getResult(err, res, next) {
   const purpose = err.purpose;
   console.error(err);
   return err.message === "No User"
@@ -123,4 +123,4 @@ exports.getResult = (err, res, next) => {
         },
       })
     : next(err);
-};
+}

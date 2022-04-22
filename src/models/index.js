@@ -1,9 +1,11 @@
-const Sequelize = require("sequelize");
-const env = process.env.NODE_ENV || "development";
-const config = require("../config/config")[env];
-const Product = require("./products");
-const User = require("./users");
-const Auth = require("./auths");
+import config from "../config/config"[env]
+
+// const Sequelize = require("sequelize");
+// const env = process.env.NODE_ENV || "development";
+// const config = require("../config/config")[env];
+// const Product = require("./products");
+// const User = require("./users");
+// const Auth = require("./auths");
 
 const db = {};
 

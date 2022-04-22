@@ -1,7 +1,7 @@
-const dataWorker = require("../data/productData");
-const errorWorker = require("../errors/productControllerErr.js");
+import * as dataWorker from "../data/productData.js";
+import * as errorWorker from "../errors/productControllerErr.js";
 
-async function getProductDetailById(req, res, next) {
+export async function getProductDetailById(req, res, next) {
   const productId = Number(req.query.id);
 
   try {
@@ -17,7 +17,7 @@ async function getProductDetailById(req, res, next) {
   }
 }
 
-async function getProductDetailByName(req, res, next) {
+export async function getProductDetailByName(req, res, next) {
   const productName = req.query.name;
 
   try {
@@ -33,7 +33,7 @@ async function getProductDetailByName(req, res, next) {
   }
 }
 
-async function getProductMain(req, res, next) {
+export async function getProductMain(req, res, next) {
   try {
     const products = await dataWorker.productFindAll();
 
@@ -47,12 +47,12 @@ async function getProductMain(req, res, next) {
   }
 }
 
-async function createProduct(req, res, next) {
-  const package = req.body;
-  package.id = Date.now().toString();
+export async function createProduct(req, res, next) {
+  const payload = req.body;
+  payload.id = Date.now().toString();
 
   try {
-    const result = await dataWorker.Create(package);
+    const result = await dataWorker.Create(payload);
     return res.status(201).json({
       code: 201,
       message: "The product has been created",
@@ -63,12 +63,12 @@ async function createProduct(req, res, next) {
   }
 }
 
-async function modifyProduct(req, res, next) {
+export async function modifyProduct(req, res, next) {
   const productId = req.query.id;
-  const package = req.body;
+  const payload = req.body;
 
   try {
-    await dataWorker.Update(package, productId);
+    await dataWorker.Update(payload, productId);
     const purpose = "Update";
     const result = await dataWorker.GetResult(productId, purpose);
     return res.status(201).json({
@@ -83,7 +83,7 @@ async function modifyProduct(req, res, next) {
   }
 }
 
-async function removeProduct(req, res, next) {
+export async function removeProduct(req, res, next) {
   const productId = req.query.id;
 
   try {
@@ -98,12 +98,3 @@ async function removeProduct(req, res, next) {
     errorWorker.getResult(err, res, next);
   }
 }
-
-module.exports = {
-  getProductDetailById,
-  getProductDetailByName,
-  getProductMain,
-  createProduct,
-  modifyProduct,
-  removeProduct,
-};

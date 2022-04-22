@@ -1,10 +1,9 @@
-const { query } = require("express");
-const express = require("express");
+import express from "express";
 
-const controllWorker = require("../controller/productController");
-const isLogin = require("../middlewares/isLogin");
-const isMaster = require("../middlewares/isMaster");
-const limiter = require("../middlewares/limiter");
+import isLogin from "../models/isLogin.js";
+import isMaster from "../models/isMaster.js";
+import limiter from "../models/limiter";
+import * as controllWorker from "../controller/productController.js";
 
 const router = express.Router();
 
@@ -24,4 +23,4 @@ router
   .patch(isLogin, isMaster, controllWorker.modifyProduct)
   .delete(isLogin, isMaster, controllWorker.removeProduct);
 
-module.exports = router;
+export default router;

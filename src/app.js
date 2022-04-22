@@ -1,11 +1,10 @@
-const express = require("express");
-const morgan = require("morgan");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const passport = require("passport");
-const passportConfig = require("./passport");
-
-const { sequelize } = require("./models");
+import express from "express";
+import morgan from "morgan";
+import dotenv from "dotenv";
+import cors from "cors";
+import passport from "passport";
+import passportConfig from "./passport";
+import { sequelize } from "./models";
 
 dotenv.config();
 const app = express();

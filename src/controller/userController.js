@@ -1,8 +1,9 @@
-const dataWorker = require("../data/userData");
-const errorWorker = require("../errors/userControllerErr");
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
-async function join(req, res) {
+import * as dataWorker from "../data/userData.js";
+import * as errorWorker from "../errors/userControllerErr.js";
+
+export async function join(req, res) {
   const { usedEmail, usedNickname, usedPassword, usedReEnterPassword } =
     req.body;
 
@@ -50,7 +51,7 @@ async function join(req, res) {
   });
 }
 
-async function findEmail(req, res, next) {
+export async function findEmail(req, res, next) {
   const userSecret = req.query.secret;
 
   try {
@@ -65,7 +66,7 @@ async function findEmail(req, res, next) {
   }
 }
 
-async function changePassword(req, res, next) {
+export async function changePassword(req, res, next) {
   const { altPassword, reEnterPassword } = req.body;
   const { email } = req.query;
 
@@ -104,15 +105,15 @@ async function changePassword(req, res, next) {
   });
 }
 
-async function modifyUser(req, res, next) {
+export async function modifyUser(req, res, next) {
   const userId = req.query.id;
-  const package = req.body;
+  const payload = req.body;
 
   try {
-    const hashed = bcrypt.hashSync(package.password, 12);
-    package.password = hashed;
+    const hashed = bcrypt.hashSync(payload.password, 12);
+    payload.password = hashed;
 
-    await dataWorker.Update(package, userId);
+    await dataWorker.Update(payload, userId);
     const purpose = "Update";
     const result = await dataWorker.GetResult(userId, purpose);
 
@@ -128,7 +129,7 @@ async function modifyUser(req, res, next) {
   }
 }
 
-async function removeUser(req, res, next) {
+export async function removeUser(req, res, next) {
   const userId = req.query.id;
 
   try {
@@ -143,5 +144,3 @@ async function removeUser(req, res, next) {
     errorWorker.getResult(err, res, next);
   }
 }
-
-module.exports = { join, findEmail, changePassword, modifyUser, removeUser };

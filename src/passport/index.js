@@ -1,12 +1,12 @@
-const dotenv = require("dotenv");
+import dotenv from "dotenv";
 dotenv.config();
-const passport = require("passport");
-const { Strategy: LocalStrategy } = require("passport-local");
-const { ExtractJwt, Strategy: JWTStrategy } = require("passport-jwt");
-const bcrypt = require("bcrypt");
+import passport from "passport";
+// import { Strategy:LocalStrategy } from "passport-local";
+// import {ExtractJwt, Strategy: JWTStrategy} from "passport-jwt";
+import bcrypt from "bcrypt";
 
-const User = require("../models/users");
-const Auth = require("../models/auths");
+import User from "../models/users";
+import Auth from "../models/auths";
 
 const passportConfig = { usernameField: "email", passwordField: "password" };
 const passprotVerify = async (email, password, done) => {
@@ -65,7 +65,7 @@ const JWTVerify = async (jwtPayload, done) => {
   }
 };
 
-module.exports = () => {
+export default () => {
   passport.use("local", new LocalStrategy(passportConfig, passprotVerify));
   passport.use("jwt", new JWTStrategy(JWTConfig, JWTVerify));
 };

@@ -1,8 +1,9 @@
-const User = require("../models/users");
-const Auth = require("../models/auths");
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
-async function FindEmailToJoin(email) {
+import { User } from "../models/users.js";
+import { Auth } from "../models/auths.js";
+
+export async function FindEmailToJoin(email) {
   try {
     const exEmail = await User.findOne({
       where: { email },
@@ -15,7 +16,7 @@ async function FindEmailToJoin(email) {
   }
 }
 
-async function FindNickToJoin(nickname) {
+export async function FindNickToJoin(nickname) {
   try {
     const exNick = await User.findOne({
       where: { nickname },
@@ -40,7 +41,7 @@ function MakeHash(password) {
   return bcrypt.hashSync(password, 12);
 }
 
-async function MakeUser(exEmail, exNick, hash) {
+export async function MakeUser(exEmail, exNick, hash) {
   try {
     return await User.create({
       id: Date.now().toString(),
@@ -53,7 +54,7 @@ async function MakeUser(exEmail, exNick, hash) {
   }
 }
 
-async function AddAuth(userId) {
+export async function AddAuth(userId) {
   const userSecret = (() => {
     let result = "";
     const character =
@@ -90,7 +91,7 @@ async function AddAuth(userId) {
   }
 }
 
-async function FindEmailToGet(userSecret) {
+export async function FindEmailToGet(userSecret) {
   try {
     const user = await Auth.findOne({
       where: { userSecret },
@@ -111,7 +112,7 @@ async function FindEmailToGet(userSecret) {
   }
 }
 
-async function FindEmailToUser(email) {
+export async function FindEmailToUser(email) {
   try {
     const user = await User.findOne({
       where: { email },
@@ -123,7 +124,7 @@ async function FindEmailToUser(email) {
   }
 }
 
-async function DisableHashing(exPassword, hashedPassword) {
+export async function DisableHashing(exPassword, hashedPassword) {
   try {
     const isCorrect = await bcrypt.compare(exPassword, hashedPassword);
     if (!isCorrect) throw new Error("Invalid password");
@@ -132,7 +133,7 @@ async function DisableHashing(exPassword, hashedPassword) {
   }
 }
 
-async function ModifyPassword(newPassword, email) {
+export async function ModifyPassword(newPassword, email) {
   try {
     await User.update(
       {
@@ -147,9 +148,9 @@ async function ModifyPassword(newPassword, email) {
   }
 }
 
-async function Update(package, userId) {
+export async function Update(payload, userId) {
   try {
-    await User.update(package, {
+    await User.update(payload, {
       where: { id: userId },
     });
   } catch (err) {
@@ -157,7 +158,7 @@ async function Update(package, userId) {
   }
 }
 
-async function Destroy(userId) {
+export async function Destroy(userId) {
   try {
     await User.destroy({
       where: { id: userId },
@@ -167,7 +168,7 @@ async function Destroy(userId) {
   }
 }
 
-async function GetResult(userId, purpose) {
+export async function GetResult(userId, purpose) {
   try {
     const user = await User.findOne({
       where: { id: userId },
@@ -185,19 +186,3 @@ async function GetResult(userId, purpose) {
     throw err;
   }
 }
-
-module.exports = {
-  FindEmailToJoin,
-  FindNickToJoin,
-  MatchPassword,
-  MakeHash,
-  MakeUser,
-  AddAuth,
-  FindEmailToGet,
-  FindEmailToUser,
-  DisableHashing,
-  ModifyPassword,
-  Update,
-  GetResult,
-  Destroy,
-};

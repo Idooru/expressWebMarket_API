@@ -1,7 +1,7 @@
-const dataWorker = require("../data/authData");
-const passport = require("passport");
+import passport from "passport";
+import * as dataWorker from "../data/authData.js";
 
-function login(req, res, next) {
+export function login(req, res, next) {
   try {
     passport.authenticate("local", (error, user, info) => {
       if (error || !user) {
@@ -37,7 +37,7 @@ function login(req, res, next) {
   }
 }
 
-async function me(req, res) {
+export async function me(req, res) {
   const authority = req.isMaster ? "master" : "user";
   const userId = req.decoded.userId;
 
@@ -58,8 +58,3 @@ async function me(req, res) {
 
   return res.status(200).json(result);
 }
-
-module.exports = {
-  login,
-  me,
-};
