@@ -3,7 +3,7 @@ const Auth = require("../models/auths");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-function checkToLogin(auth) {
+function CheckToLogin(auth) {
   return auth ? false : true;
 }
 
@@ -31,16 +31,27 @@ async function MatchPasswordToLogin(email, password) {
   }
 }
 
-function createJwtToken(user) {
-  delete user.dataValues.password;
-  return jwt.sign({ user }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
+function CreateJwtToken(data) {
+  return jwt.sign(data, process.env.JWT_SECRET, {
+    expiresIn: "24h",
   });
 }
 
+async function IncludeJwtOnAuth(userId, token) {
+  await Auth.update(
+    {
+      haveJWTtoken: token,
+    },
+    {
+      where: { id: userId },
+    }
+  );
+}
+
 module.exports = {
-  checkToLogin,
+  CheckToLogin,
   FindUserToLogin,
   MatchPasswordToLogin,
-  createJwtToken,
+  CreateJwtToken,
+  IncludeJwtOnAuth,
 };

@@ -13,6 +13,11 @@ module.exports = class Auth extends Sequelize.Model {
           allowNull: false,
           unique: true,
         },
+        haveJWTtoken: {
+          type: Sequelize.UUID,
+          allowNull: true,
+          unique: true,
+        },
       },
       {
         sequelize,

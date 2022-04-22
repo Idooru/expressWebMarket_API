@@ -105,7 +105,7 @@ async function changePassword(req, res, next) {
 }
 
 async function modifyUser(req, res, next) {
-  const userId = req.params.id;
+  const userId = req.query.id;
   const package = req.body;
 
   try {

@@ -1,10 +1,7 @@
 const express = require("express");
-const path = require("path");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const favicon = require("serve-favicon");
-const session = require("express-session");
 const passport = require("passport");
 const passportConfig = require("./passport");
 
@@ -44,9 +41,9 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  return res.status(err.status).json({
+  return res.status(500).json({
     Error: {
-      code: err.status,
+      code: 500,
       error: err.message,
     },
   });

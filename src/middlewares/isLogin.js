@@ -4,14 +4,15 @@ const Auth = require("../models/auths");
 module.exports = async (req, res, next) => {
   try {
     req.decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
-    const userId = req.decoded.user.id;
-    let userType = await Auth.findOne({
+    const userId = req.decoded.userId;
+    const result = await Auth.findOne({
       where: { id: userId },
       attributes: ["userType"],
     });
-    userType = userType.userType;
 
-    return userType === "master" ? ((req.isMaster = true), next()) : next();
+    return result.userType === "master"
+      ? ((req.isMaster = true), next())
+      : next();
   } catch (err) {
     return err.name === "TokenExpiredError"
       ? res.status(419).json({

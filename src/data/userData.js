@@ -77,11 +77,13 @@ async function AddAuth(userId) {
           id: userId,
           userType: "master",
           userSecret,
+          haveJWTtoken: "",
         })
       : await Auth.create({
           id: userId,
           userType: "user",
           userSecret,
+          haveJWTtoken: "",
         });
   } catch (err) {
     throw err;

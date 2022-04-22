@@ -1,24 +1,28 @@
 const dataWorker = require("../data/authData");
-const errorWorker = require("../errors/authControllerErr");
 const passport = require("passport");
 
-async function login(req, res, next) {
+function login(req, res, next) {
   try {
     passport.authenticate("local", (error, user, info) => {
       if (error || !user) {
         return res.status(401).json(info);
       }
 
-      req.login(user, { session: false }, (loginError) => {
+      req.login(user, { session: false }, async (loginError) => {
         if (loginError) {
           return next(loginError);
         }
 
-        const token = dataWorker.createJwtToken(user);
+        const userId = user.id;
+        const userType = user.type;
+        const data = { userId, userType, status: "login" };
+        const token = dataWorker.CreateJwtToken(data);
         const result = {};
 
-        result.user = user.dataValues;
+        result.data = data;
         result.token = token;
+
+        await dataWorker.IncludeJwtOnAuth(userId, token);
 
         return res.status(200).json({
           code: 200,
@@ -29,29 +33,30 @@ async function login(req, res, next) {
     })(req, res, next);
   } catch (err) {
     console.error(err);
-    next(err);
+    return next(err);
   }
 }
 
 async function me(req, res) {
-  const nickname = req.decoded.user.nickname;
-  const authority = req.authority;
+  const authority = req.isMaster ? "master" : "user";
+  const userId = req.decoded.userId;
+
   const result =
-    req.authority === "master"
+    authority === "master"
       ? {
           code: 200,
           message: "The token is valid, welcome master",
-          nickname,
+          userId,
           authority,
         }
       : {
           code: 200,
           message: "The token is valid",
-          nickname,
+          userId,
           authority,
         };
 
-  return res.status(200).json({ result });
+  return res.status(200).json(result);
 }
 
 module.exports = {

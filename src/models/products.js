@@ -4,6 +4,13 @@ module.exports = class Product extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
+        id: {
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
+          primaryKey: true,
+          allowNull: false,
+          unique: true,
+        },
         name: {
           type: Sequelize.STRING(20),
           allowNull: false,

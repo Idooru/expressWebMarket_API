@@ -20,8 +20,8 @@ router.get("/searchAll", controllWorker.getProductMain);
 
 router
   .route("/operation")
-  .post(controllWorker.createProduct)
-  .patch(controllWorker.modifyProduct)
-  .delete(controllWorker.removeProduct);
+  .post(isLogin, isMaster, controllWorker.createProduct)
+  .patch(isLogin, isMaster, controllWorker.modifyProduct)
+  .delete(isLogin, isMaster, controllWorker.removeProduct);
 
 module.exports = router;
