@@ -3,14 +3,14 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import cors from "cors";
 import passport from "passport";
-import passportConfig from "./passport";
-import { sequelize } from "./models";
+import passportConfig from "./passport/index.js";
+import sequelize from "./models/index.js";
 
 dotenv.config();
 const app = express();
 
 app.set("port", process.env.PORT || 5147);
-sequelize
+sequelize.sequelize
   .sync({ force: false })
   .then(() => {
     console.log("Sucess to connect for SQL!");
@@ -25,9 +25,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 passportConfig();
 
-const productRouter = require("./routes/products");
-const authRouter = require("./routes/auth");
-const userRouter = require("./routes/user");
+import productRouter from "./routes/product.js";
+import authRouter from "./routes/auth.js";
+import userRouter from "./routes/user.js";
 
 app.use("/products", productRouter);
 app.use("/auth", authRouter);

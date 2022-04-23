@@ -1,12 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
 import passport from "passport";
-// import { Strategy:LocalStrategy } from "passport-local";
-// import {ExtractJwt, Strategy: JWTStrategy} from "passport-jwt";
+import pkg from "passport-local";
+
+const LocalStrategy = pkg;
+
 import bcrypt from "bcrypt";
 
-import User from "../models/users";
-import Auth from "../models/auths";
+import { User } from "../models/users.js";
+import { Auth } from "../models/auths.js";
 
 const passportConfig = { usernameField: "email", passwordField: "password" };
 const passprotVerify = async (email, password, done) => {
@@ -42,30 +44,30 @@ const passprotVerify = async (email, password, done) => {
   }
 };
 
-const JWTConfig = {
-  jwtFromRequest: ExtractJwt.fromHeader("authorization"),
-  secretOrKey: process.env.JWT_SECRET,
-};
+// const JWTConfig = {
+//   jwtFromRequest: ExtractJwt.fromHeader("authorization"),
+//   secretOrKey: process.env.JWT_SECRET,
+// };
 
-const JWTVerify = async (jwtPayload, done) => {
-  try {
-    const user = await User.findOne({ where: { id: jwtPayload.id } });
-    if (user) {
-      return done(null, user);
-    }
-    done(null, false, {
-      Login_ERROR: {
-        code: 401,
-        message: "Failed to login, The token is invalid",
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    done(err);
-  }
-};
+// const JWTVerify = async (jwtPayload, done) => {
+//   try {
+//     const user = await User.findOne({ where: { id: jwtPayload.id } });
+//     if (user) {
+//       return done(null, user);
+//     }
+//     done(null, false, {
+//       Login_ERROR: {
+//         code: 401,
+//         message: "Failed to login, The token is invalid",
+//       },
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     done(err);
+//   }
+// };
 
 export default () => {
   passport.use("local", new LocalStrategy(passportConfig, passprotVerify));
-  passport.use("jwt", new JWTStrategy(JWTConfig, JWTVerify));
+  //   passport.use("jwt", new JWTStrategy(JWTConfig, JWTVerify));
 };

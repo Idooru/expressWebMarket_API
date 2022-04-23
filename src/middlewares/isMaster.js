@@ -1,4 +1,4 @@
-export function isMaster(req, res, next) {
+export default (req, res, next) => {
   try {
     if (req.isMaster) {
       return next();
@@ -12,4 +12,4 @@ export function isMaster(req, res, next) {
       },
     });
   }
-}
+};

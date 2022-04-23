@@ -4,9 +4,9 @@ dotenv.config();
 
 import { Auth } from "../models/auths.js";
 
-export default async function test(req, res, next) {
+export default async (req, res, next) => {
   try {
-    req.decode = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
+    req.decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
     const userId = req.decoded.userId;
     const result = await Auth.findOne({
       where: { id: userId },
@@ -30,4 +30,4 @@ export default async function test(req, res, next) {
           },
         });
   }
-}
+};

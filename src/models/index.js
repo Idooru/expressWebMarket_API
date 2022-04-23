@@ -1,12 +1,10 @@
-import config from "../config/config"[env]
+import { Sequelize } from "sequelize";
+import setting from "../config/config.js";
+import { Product } from "./products.js";
+import { User } from "./users.js";
+import { Auth } from "./auths.js";
 
-// const Sequelize = require("sequelize");
-// const env = process.env.NODE_ENV || "development";
-// const config = require("../config/config")[env];
-// const Product = require("./products");
-// const User = require("./users");
-// const Auth = require("./auths");
-
+const config = process.env.NODE_ENV || setting.development;
 const db = {};
 
 const sequelize = new Sequelize(
@@ -29,4 +27,4 @@ Auth.init(sequelize);
 User.associate(db);
 Auth.associate(db);
 
-module.exports = db;
+export default db;
