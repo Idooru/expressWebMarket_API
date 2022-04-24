@@ -2,7 +2,7 @@ export function getProductDetail(err, res, next) {
   console.error(err);
   return err.message === "No Product"
     ? res.status(404).json({
-        FindProduct_ERROR: {
+        Find_ERROR: {
           code: 404,
           message: `Failed to get product's info by id of ${err.data}`,
         },
@@ -14,7 +14,7 @@ export function productFindAll(err, res, next) {
   console.error(err);
   return err.message === "No Product"
     ? res.status(500).json({
-        FindProduct_ERROR: {
+        Find_ERROR: {
           code: 500,
           message: "Thers is no product, Add product more!",
         },

@@ -2,42 +2,41 @@ export function promiseOnJoin(errs) {
   const errStatus = [];
   const errType = [];
 
-  for (let err of errs) {
-    switch (err.message) {
-      case "Exist Email":
-        console.error(err);
-        errStatus.push({
-          code: 401,
-          message: "Failed to join, The email is exist",
-        });
-        errType.push("Email_ERROR");
-        break;
+  switch (errs.message) {
+    case "Exist Email":
+      console.error(errs);
+      errStatus.push({
+        code: 401,
+        message: "Failed to join, The email is exist",
+      });
+      errType.push("Email_ERROR");
+      break;
 
-      case "Exist Nickname":
-        console.error(err);
-        errStatus.push({
-          code: 401,
-          message: "Failed to join, The nickname is exist",
-        });
-        errType.push("Nickname_ERROR");
-        break;
+    case "Exist Nickname":
+      console.error(errs);
+      errStatus.push({
+        code: 401,
+        message: "Failed to join, The nickname is exist",
+      });
+      errType.push("Nickname_ERROR");
+      break;
 
-      case "Password Inconsistency":
-        console.error(err);
-        errStatus.push({
-          code: 401,
-          message: "Failed to join, These passwords do not match each other",
-        });
-        errType.push("Password_ERROR");
-        break;
+    case "Password Inconsistency":
+      console.error(errs);
+      errStatus.push({
+        code: 401,
+        message: "Failed to join, These passwords do not match each other",
+      });
+      errType.push("Password_ERROR");
+      break;
 
-      default:
-        console.error(err);
-        errStatus.push({ code: 500, message: err.message });
-        errType.push("Server_Error");
-        break;
-    }
+    default:
+      console.error(errs);
+      errStatus.push({ code: 500, message: errs.message });
+      errType.push("Server_Error");
+      break;
   }
+
   return { status: [...errStatus], type: [...errType] };
 }
 
@@ -58,32 +57,30 @@ export function promiseOnChangePassword(errs) {
   const errStatus = [];
   const errType = [];
 
-  for (let err of errs) {
-    switch (err.message) {
-      case "Nonexist Email":
-        console.error(err);
-        errStatus.push({
-          code: 401,
-          message: "Failed to change for password, The email is nonexist",
-        });
-        errType.push("Email_ERROR");
-        break;
+  switch (errs.message) {
+    case "Nonexist Email":
+      console.error(errs);
+      errStatus.push({
+        code: 401,
+        message: "Failed to change for password, The email is nonexist",
+      });
+      errType.push("Email_ERROR");
+      break;
 
-      case "Password Inconsistency":
-        console.error(err);
-        errStatus.push({
-          code: 401,
-          message: "Failed to join, These passwords do not match each other",
-        });
-        errType.push("Password_ERROR");
-        break;
+    case "Password Inconsistency":
+      console.error(errs);
+      errStatus.push({
+        code: 401,
+        message: "Failed to join, These passwords do not match each other",
+      });
+      errType.push("Password_ERROR");
+      break;
 
-      default:
-        console.error(err);
-        errStatus.push({ code: 500, message: err.message });
-        errType.push("Server_Error");
-        break;
-    }
+    default:
+      console.error(errs);
+      errStatus.push({ code: 500, message: errs.message });
+      errType.push("Server_Error");
+      break;
   }
 
   return { status: [...errStatus], type: [...errType] };

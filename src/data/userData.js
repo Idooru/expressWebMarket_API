@@ -29,7 +29,7 @@ export async function FindNickToJoin(nickname) {
   }
 }
 
-function MatchPassword(password, repassword) {
+export function MatchPassword(password, repassword) {
   return new Promise((resolve, reject) =>
     password === repassword
       ? resolve(password)
@@ -37,7 +37,7 @@ function MatchPassword(password, repassword) {
   );
 }
 
-function MakeHash(password) {
+export function MakeHash(password) {
   return bcrypt.hashSync(password, 12);
 }
 

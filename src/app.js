@@ -4,18 +4,12 @@ import dotenv from "dotenv";
 import cors from "cors";
 import passport from "passport";
 import passportConfig from "./passport/index.js";
-import sequelize from "./models/index.js";
+import mySql from "./models/index.js";
 
 dotenv.config();
 const app = express();
 
 app.set("port", process.env.PORT || 5147);
-sequelize.sequelize
-  .sync({ force: false })
-  .then(() => {
-    console.log("Sucess to connect for SQL!");
-  })
-  .catch((err) => console.error(err));
 
 app.use(morgan("dev"));
 app.use(cors());
@@ -49,6 +43,12 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(app.get("port"), () => {
+  mySql.sequelize
+    .sync({ force: false })
+    .then(() => {
+      console.log("Sucess to connect for SQL!");
+    })
+    .catch((err) => console.error(err));
   console.log(
     `### API server is running at http://localhost:${app.get("port")} ###`
   );

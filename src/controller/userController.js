@@ -14,30 +14,31 @@ export async function join(req, res) {
     usedReEnterPassword
   );
 
-  const rejectedStatus = [];
-  const valueArray = await Promise.allSettled([
-    exEmail,
-    exNick,
-    isPwMatched,
-  ]).then((settle) =>
+  const payload = [exEmail, exNick, isPwMatched];
+  const promiseResult = await Promise.allSettled(payload).then((settle) =>
     settle.map((res) =>
-      res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
+      res.status === "rejected" ? { rejected: res.reason } : res.value
     )
   );
+  const rejected = promiseResult.filter((res) => res.rejected);
 
-  if (rejectedStatus.length) {
-    const error = errorWorker.promiseOnJoin(rejectedStatus);
-    const result = {};
+  if (rejected.length) {
+    const outputs = rejected.map((idx) => {
+      const pointer = idx.rejected;
+      const error = errorWorker.promiseOnJoin(pointer);
+      const result = {};
 
-    for (let i in error.status) {
-      for (let j in error.type) {
-        if (i === j) result[error.type[j]] = error.status[i];
+      for (let i in error.status) {
+        for (let j in error.type) {
+          if (i === j) result[error.type[j]] = error.status[i];
+        }
       }
-    }
-    return res.status(error.status[0].code).json(result);
+      return result;
+    });
+    return res.status(400).json(outputs);
   }
 
-  const [email, nickname, password] = valueArray;
+  const [email, nickname, password] = promiseResult;
   const hash = dataWorker.MakeHash(password);
   const user = await dataWorker.MakeUser(email, nickname, hash);
   const userId = user.id;
@@ -72,29 +73,32 @@ export async function changePassword(req, res, next) {
 
   const exUser = dataWorker.FindEmailToUser(email);
   const isPwMatched = dataWorker.MatchPassword(altPassword, reEnterPassword);
+  const payload = [exUser, isPwMatched];
 
-  const rejectedStatus = [];
-  const valueArray = await Promise.allSettled([exUser, isPwMatched]).then(
-    (settle) =>
-      settle.map((res) =>
-        res.status === "rejected" ? rejectedStatus.push(res.reason) : res.value
-      )
+  const promiseResult = await Promise.allSettled(payload).then((settle) =>
+    settle.map((res) =>
+      res.status === "rejected" ? { rejected: res.reason } : res.value
+    )
   );
+  const rejected = promiseResult.filter((res) => res.rejected);
 
-  if (rejectedStatus.length) {
-    const error = errorWorker.promiseOnChangePassword(rejectedStatus);
-    const result = {};
+  if (rejected.length) {
+    const outputs = rejected.map((idx) => {
+      const pointer = idx.rejected;
+      const error = errorWorker.promiseOnChangePassword(pointer);
+      const result = {};
 
-    for (let i in error.status) {
-      for (let j in error.type) {
-        if (i === j) result[error.type[j]] = error.status[i];
+      for (let i in error.status) {
+        for (let j in error.type) {
+          if (i === j) result[error.type[j]] = error.status[i];
+        }
       }
-    }
-
-    return res.status(error.status[0].code).json(result);
+      return result;
+    });
+    return res.status(400).json(outputs);
   }
 
-  const [user, newPassword] = valueArray;
+  const [user, newPassword] = promiseResult;
 
   const hashed = dataWorker.MakeHash(newPassword);
   await dataWorker.ModifyPassword(hashed, user.email);
