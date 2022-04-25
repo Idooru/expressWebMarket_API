@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 import passport from "passport";
-import pkg from "passport-local";
+import pkg1 from "passport-local";
 
-const LocalStrategy = pkg;
+const LocalStrategy = pkg1;
 
 import bcrypt from "bcrypt";
 
@@ -16,7 +16,7 @@ const passprotVerify = async (email, password, done) => {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return done(null, false, {
-        Login_ERROR: {
+        Email_ERROR: {
           code: 401,
           message: "Failed to login, The email does not exist",
         },
@@ -33,7 +33,7 @@ const passprotVerify = async (email, password, done) => {
     comparePassword
       ? done(null, user)
       : done(null, false, {
-          Login_ERROR: {
+          Password_ERROR: {
             code: 401,
             message: "Failed to login, The password does not exist",
           },
@@ -44,30 +44,6 @@ const passprotVerify = async (email, password, done) => {
   }
 };
 
-// const JWTConfig = {
-//   jwtFromRequest: ExtractJwt.fromHeader("authorization"),
-//   secretOrKey: process.env.JWT_SECRET,
-// };
-
-// const JWTVerify = async (jwtPayload, done) => {
-//   try {
-//     const user = await User.findOne({ where: { id: jwtPayload.id } });
-//     if (user) {
-//       return done(null, user);
-//     }
-//     done(null, false, {
-//       Login_ERROR: {
-//         code: 401,
-//         message: "Failed to login, The token is invalid",
-//       },
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     done(err);
-//   }
-// };
-
 export default () => {
   passport.use("local", new LocalStrategy(passportConfig, passprotVerify));
-  //   passport.use("jwt", new JWTStrategy(JWTConfig, JWTVerify));
 };

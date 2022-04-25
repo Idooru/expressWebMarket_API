@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
-import setting from "../config/config.js";
+
+import setting from "../config/index.js";
 import { Product } from "./products.js";
 import { User } from "./users.js";
 import { Auth } from "./auths.js";
@@ -20,7 +21,6 @@ db.User = User;
 db.Auth = Auth;
 
 Product.init(sequelize);
-
 User.init(sequelize);
 Auth.init(sequelize);
 
