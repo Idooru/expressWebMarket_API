@@ -3,6 +3,7 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import cors from "cors";
 import passport from "passport";
+import cookieParser from "cookie-parser";
 import passportConfig from "./passport/index.js";
 import mySql from "./models/index.js";
 
@@ -15,6 +16,7 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use(passport.initialize());
 passportConfig();

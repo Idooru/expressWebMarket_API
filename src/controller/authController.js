@@ -24,7 +24,7 @@ export function login(req, res, next) {
 
         await dataWorker.IncludeJwtOnAuth(userId, token);
 
-        return res.status(200).json({
+        return res.status(200).cookie("jwt", token).json({
           code: 200,
           message: "Sucess to login and a token has been verifyed",
           result,
