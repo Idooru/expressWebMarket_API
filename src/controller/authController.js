@@ -58,3 +58,11 @@ export async function me(req, res) {
 
   return res.status(200).json(result);
 }
+
+export function logout(req, res) {
+  res.cookie("jwt", "");
+  res.status(200).json({
+    code: 200,
+    message: "Sucess to logout",
+  });
+}
