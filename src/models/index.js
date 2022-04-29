@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import Sequelize from "sequelize";
 
 import { setting } from "../config/index.js";
 import { Product } from "./products.js";
