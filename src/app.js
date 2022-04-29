@@ -4,8 +4,9 @@ import dotenv from "dotenv";
 import cors from "cors";
 import passport from "passport";
 import cookieParser from "cookie-parser";
+
 import passportConfig from "./passport/index.js";
-import mySql from "./models/index.js";
+import { db } from "./models/index.js";
 
 dotenv.config();
 const app = express();
@@ -45,7 +46,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(app.get("port"), () => {
-  mySql.sequelize
+  db.sequelize
     .sync({ force: false })
     .then(() => {
       console.log("Sucess to connect for SQL!");

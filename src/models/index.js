@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 
-import setting from "../config/index.js";
+import { setting } from "../config/index.js";
 import { Product } from "./products.js";
 import { User } from "./users.js";
 import { Auth } from "./auths.js";
@@ -27,4 +27,4 @@ Auth.init(sequelize);
 User.associate(db);
 Auth.associate(db);
 
-export default db;
+export { db };

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-export default {
+export const setting = {
   development: {
     username: "root",
     password: process.env.SEQUELIZE_PASSWORD,
