@@ -48,11 +48,10 @@ export async function getProductMain(req, res, next) {
 }
 
 export async function createProduct(req, res, next) {
-  const payload = req.body;
-  payload.id = Date.now().toString();
+  const payLoad = req.body;
 
   try {
-    const result = await dataWorker.Create(payload);
+    const result = await dataWorker.Create(payLoad);
     return res.status(201).json({
       code: 201,
       message: "The product has been created",
