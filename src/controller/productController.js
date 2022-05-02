@@ -1,5 +1,5 @@
 import * as dataWorker from "../data/productData.js";
-import * as errorWorker from "../errors/productControllerErr.js";
+import * as errorWorker from "../errors/productErr.js";
 
 export async function getProductDetailById(req, res, next) {
   const productId = Number(req.query.id);

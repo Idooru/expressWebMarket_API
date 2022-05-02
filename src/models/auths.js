@@ -16,7 +16,7 @@ export class Auth extends Sequelize.Model {
         haveJWTtoken: {
           type: Sequelize.UUID,
           allowNull: true,
-          unique: true,
+          unique: false,
         },
       },
       {

@@ -1,5 +1,6 @@
 import passport from "passport";
 import * as dataWorker from "../data/authData.js";
+import * as errorWorker from "../errors/authErr.js";
 
 export function login(req, res, next) {
   try {
@@ -14,8 +15,17 @@ export function login(req, res, next) {
         }
 
         const userId = user.id;
+
+        try {
+          await dataWorker.isJwtExist(userId);
+        } catch (err) {
+          errorWorker.isJwtExist(err, res, next);
+          return;
+        }
+
         const userType = user.type;
-        const data = { userId, userType, status: "login" };
+        const whenLogin = new Date().toString();
+        const data = { userId, userType, whenLogin };
         const token = dataWorker.CreateJwtToken(data);
         const result = {};
 
@@ -59,7 +69,9 @@ export async function me(req, res) {
   return res.status(200).json(result);
 }
 
-export function logout(req, res) {
+export async function logout(req, res) {
+  const userId = req.decoded.userId;
+  await dataWorker.RemoveJwtOnAuth(userId);
   res.cookie("jwt", "");
   res.status(200).json({
     code: 200,

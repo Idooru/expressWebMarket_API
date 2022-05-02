@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 
 import * as dataWorker from "../data/userData.js";
-import * as errorWorker from "../errors/userControllerErr.js";
+import * as errorWorker from "../errors/userErr.js";
 
 export async function join(req, res) {
   const { usedEmail, usedNickname, usedPassword, usedReEnterPassword } =
