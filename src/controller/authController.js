@@ -26,14 +26,15 @@ export function login(req, res, next) {
         const whenLogin = new Date().toString();
         const data = { userId, userType, whenLogin };
         const token = dataWorker.CreateJwtToken(data);
+        const encryptedToken = dataWorker.EncryptJWTtoken(token);
         const result = {};
 
         result.data = data;
-        result.token = token;
+        result.token = encryptedToken;
 
-        await dataWorker.IncludeLoginStatus(userId, token);
+        await dataWorker.IncludeLoginStatus(userId);
 
-        return res.status(200).cookie("authorization", token).json({
+        return res.status(200).cookie("authorization", encryptedToken).json({
           code: 200,
           message: "Sucess to login and a token has been verifyed",
           result,

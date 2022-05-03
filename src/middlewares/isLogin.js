@@ -1,12 +1,25 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import crypto from "crypto";
 dotenv.config();
 
 import { Auth } from "../models/auths.js";
 
 export default async (req, res, next) => {
   try {
-    req.decoded = jwt.verify(req.cookies.authorization, process.env.JWT_SECRET);
+    const decipher = crypto.createDecipheriv(
+      process.env.JWT_ENCRYPT_ALGORITHM,
+      process.env.JWT_ENCRYPT_KEY,
+      process.env.JWT_ENCRYPT_IV
+    );
+    let decodedToken = decipher.update(
+      req.cookies.authorization,
+      "base64",
+      "utf8"
+    );
+    decodedToken += decipher.final("utf8");
+
+    req.decoded = jwt.verify(decodedToken, process.env.JWT_SECRET);
     const userId = req.decoded.userId;
     const result = await Auth.findOne({
       where: { id: userId },

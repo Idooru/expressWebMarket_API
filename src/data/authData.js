@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+
 import { Auth } from "../models/auths.js";
 
 export async function IsLogin(userId) {
@@ -20,7 +22,18 @@ export function CreateJwtToken(data) {
   });
 }
 
-export async function IncludeLoginStatus(userId, token) {
+export function EncryptJWTtoken(token) {
+  const cipher = crypto.createCipheriv(
+    process.env.JWT_ENCRYPT_ALGORITHM,
+    process.env.JWT_ENCRYPT_KEY,
+    process.env.JWT_ENCRYPT_IV
+  );
+  let result = cipher.update(token, "utf8", "base64");
+  result += cipher.final("base64");
+  return result;
+}
+
+export async function IncludeLoginStatus(userId) {
   await Auth.update(
     {
       isLogin: "true",
