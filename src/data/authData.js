@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
 import { Auth } from "../models/auths.js";
 
-export async function isJwtExist(userId) {
+export async function IsLogin(userId) {
   try {
-    const isToken = await Auth.findOne({
+    const result = await Auth.findOne({
       where: { id: userId },
-      attributes: ["haveJWTtoken"],
+      attributes: ["isLogin"],
     });
 
-    if (isToken.haveJWTtoken) throw new Error("Token is exist");
+    if (result.isLogin === "true") throw new Error("Already Login");
   } catch (err) {
     throw err;
   }
@@ -20,10 +20,10 @@ export function CreateJwtToken(data) {
   });
 }
 
-export async function IncludeJwtOnAuth(userId, token) {
+export async function IncludeLoginStatus(userId, token) {
   await Auth.update(
     {
-      haveJWTtoken: token,
+      isLogin: "true",
     },
     {
       where: { id: userId },
@@ -31,10 +31,10 @@ export async function IncludeJwtOnAuth(userId, token) {
   );
 }
 
-export async function RemoveJwtOnAuth(userId) {
+export async function RemoveLoginStatus(userId) {
   await Auth.update(
     {
-      haveJWTtoken: "",
+      isLogin: "false",
     },
     {
       where: { id: userId },

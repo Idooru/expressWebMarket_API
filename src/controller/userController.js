@@ -43,12 +43,12 @@ export async function join(req, res) {
   const user = await dataWorker.MakeUser(email, nickname, hash);
   const userId = user.id;
   const auth = await dataWorker.AddAuth(userId);
-  const createdUser = Object.assign(user.dataValues, auth.dataValues);
+  const userSecret = auth.userSecret;
 
   return res.status(201).json({
     code: 201,
     message: "Sucess to join, and do not forget userSecret",
-    createdUser,
+    userSecret,
   });
 }
 

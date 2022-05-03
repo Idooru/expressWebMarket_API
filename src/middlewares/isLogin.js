@@ -6,7 +6,7 @@ import { Auth } from "../models/auths.js";
 
 export default async (req, res, next) => {
   try {
-    req.decoded = jwt.verify(req.cookies.jwt, process.env.JWT_SECRET);
+    req.decoded = jwt.verify(req.cookies.authorization, process.env.JWT_SECRET);
     const userId = req.decoded.userId;
     const result = await Auth.findOne({
       where: { id: userId },

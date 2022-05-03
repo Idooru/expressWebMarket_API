@@ -17,10 +17,9 @@ export function login(req, res, next) {
         const userId = user.id;
 
         try {
-          await dataWorker.isJwtExist(userId);
+          await dataWorker.IsLogin(userId);
         } catch (err) {
-          errorWorker.isJwtExist(err, res, next);
-          return;
+          return errorWorker.IsLogin(err, res, next);
         }
 
         const userType = user.type;
@@ -32,9 +31,9 @@ export function login(req, res, next) {
         result.data = data;
         result.token = token;
 
-        await dataWorker.IncludeJwtOnAuth(userId, token);
+        await dataWorker.IncludeLoginStatus(userId, token);
 
-        return res.status(200).cookie("jwt", token).json({
+        return res.status(200).cookie("authorization", token).json({
           code: 200,
           message: "Sucess to login and a token has been verifyed",
           result,
@@ -71,8 +70,8 @@ export async function me(req, res) {
 
 export async function logout(req, res) {
   const userId = req.decoded.userId;
-  await dataWorker.RemoveJwtOnAuth(userId);
-  res.cookie("jwt", "");
+  await dataWorker.RemoveLoginStatus(userId);
+  res.cookie("authorization", "");
   res.status(200).json({
     code: 200,
     message: "Sucess to logout",

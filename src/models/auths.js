@@ -13,8 +13,8 @@ export class Auth extends Sequelize.Model {
           allowNull: false,
           unique: true,
         },
-        haveJWTtoken: {
-          type: Sequelize.UUID,
+        isLogin: {
+          type: Sequelize.ENUM("true", "false"),
           allowNull: true,
           unique: false,
         },

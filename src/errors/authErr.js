@@ -1,6 +1,6 @@
-export function isJwtExist(err, res, next) {
+export function IsLogin(err, res, next) {
   console.error(err);
-  return err.message === "Token is exist"
+  return err.message === "Already Login"
     ? res.status(401).json({
         Auth_ERROR: {
           code: 401,

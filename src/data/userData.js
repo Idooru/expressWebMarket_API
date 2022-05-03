@@ -61,12 +61,12 @@ export async function AddAuth(userId) {
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     const characterLength = character.length;
 
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < characterLength; i++) {
       result += character.charAt(Math.floor(Math.random() * characterLength));
     }
 
     return result;
-  })((length = 50));
+  })();
 
   try {
     const user = await User.findOne({
@@ -78,13 +78,13 @@ export async function AddAuth(userId) {
           id: userId,
           userType: "master",
           userSecret,
-          haveJWTtoken: "",
+          isLogin: "false",
         })
       : await Auth.create({
           id: userId,
           userType: "user",
           userSecret,
-          haveJWTtoken: "",
+          isLogin: "false",
         });
   } catch (err) {
     throw err;

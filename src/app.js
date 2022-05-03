@@ -17,7 +17,7 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use(passport.initialize());
 passportConfig();
@@ -37,12 +37,19 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  return res.status(500).json({
-    Error: {
-      code: 500,
-      error: err.message,
-    },
-  });
+  return err.status === 404
+    ? res.status(err.status).json({
+        Not_Found_ERROR: {
+          code: 404,
+          error: err.message,
+        },
+      })
+    : res.status(500).json({
+        Error: {
+          code: 500,
+          error: err.message,
+        },
+      });
 });
 
 app.listen(app.get("port"), () => {
