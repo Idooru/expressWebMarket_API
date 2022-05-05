@@ -1,7 +1,7 @@
 import express from "express";
 
+import limiter from "../middlewares/isLimited.js";
 import isLogin from "../middlewares/isLogin.js";
-import limiter from "../middlewares/limiter.js";
 import * as controllWorker from "../controller/userController.js";
 
 const router = express.Router();

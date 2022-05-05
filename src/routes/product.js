@@ -1,8 +1,8 @@
 import express from "express";
 
+import limiter from "../middlewares/isLimited.js";
 import isLogin from "../middlewares/isLogin.js";
 import isMaster from "../middlewares/isMaster.js";
-import limiter from "../middlewares/limiter.js";
 import * as controllWorker from "../controller/productController.js";
 
 const router = express.Router();
