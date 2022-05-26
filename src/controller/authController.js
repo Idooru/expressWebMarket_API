@@ -34,11 +34,17 @@ export function login(req, res, next) {
 
         await dataWorker.IncludeLoginStatus(userId);
 
-        return res.status(200).cookie("authorization", encryptedToken).json({
-          code: 200,
-          message: "Sucess to login and a token has been verifyed",
-          result,
-        });
+        return res
+          .status(200)
+          .cookie("authorization", encryptedToken, {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+          })
+          .json({
+            code: 200,
+            message: "Sucess to login and a token has been verifyed",
+            result,
+          });
       });
     })(req, res, next);
   } catch (err) {

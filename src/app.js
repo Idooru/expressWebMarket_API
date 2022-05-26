@@ -53,9 +53,7 @@ app.use((err, req, res, next) => {
 app.listen(app.get("port"), () => {
   db.sequelize
     .sync({ force: false })
-    .then(() => {
-      console.log("Sucess to connect for SQL!");
-    })
+    .then(() => console.log("Sucess to connect for SQL!"))
     .catch((err) => console.error(err));
   console.log(
     `### API server is running at http://localhost:${app.get("port")} ###`
