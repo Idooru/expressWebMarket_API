@@ -12,6 +12,7 @@ export default async (req, res, next) => {
       process.env.JWT_ENCRYPT_KEY,
       process.env.JWT_ENCRYPT_IV
     );
+
     let decodedToken = decipher.update(
       req.cookies.authorization,
       "base64",
@@ -20,14 +21,19 @@ export default async (req, res, next) => {
     decodedToken += decipher.final("utf8");
 
     req.decoded = jwt.verify(decodedToken, process.env.JWT_SECRET);
+
     const userId = req.decoded.userId;
     const result = await Auth.findOne({
       where: { id: userId },
       attributes: ["userType"],
     });
-    return result.userType === "master"
-      ? ((req.isMaster = true), next())
-      : next();
+
+    if (result.userType === "master") {
+      req.isMaster = true;
+      next();
+    } else {
+      next();
+    }
   } catch (err) {
     return err.name === "TokenExpiredError"
       ? res.status(419).json({
